@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block title %}Circle Strategic Partnership - NVC Fund Bank{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background-color: #061c38; min-height: 100vh; padding: 40px 0;">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-dark border-primary">
+                    <div class="card-header" style="background: linear-gradient(45deg, #66ccff, #4a90e2);">
+                        <h1 class="mb-0 text-dark">
+                            <i class="fas fa-handshake me-3"></i>
+                            Circle Strategic Partnership
+                        </h1>
+                    </div>
+                    <div class="card-body text-white">
+                        <h3 class="text-primary">Defining the Future of Institutional Digital Banking</h3>
+                        <p class="lead">
+                            Strategic partnership opportunity to combine NVC Fund Bank's $10+ trillion institutional banking authority 
+                            with Circle's $40B USDC infrastructure, creating the world's most advanced digital banking platform.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Access Materials Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-dark border-light">
+                    <div class="card-header bg-secondary">
+                        <h3 class="mb-0 text-white">
+                            <i class="fas fa-file-powerpoint text-primary me-2"></i>
+                            Executive Presentation Materials
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-primary text-dark h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-desktop fa-3x mb-3"></i>
+                                        <h5>Interactive Presentation</h5>
+                                        <p>Professional slideshow with navigation controls</p>
+                                        <a href="{{ url_for('circle.interactive_presentation') }}" 
+                                           class="btn btn-dark btn-lg">
+                                            <i class="fas fa-play me-2"></i>View Presentation
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-success text-dark h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-file-powerpoint fa-3x mb-3"></i>
+                                        <h5>PowerPoint Format</h5>
+                                        <p>Print-ready slides for executive meetings</p>
+                                        <a href="{{ url_for('circle.powerpoint_presentation') }}" 
+                                           class="btn btn-dark btn-lg">
+                                            <i class="fas fa-external-link-alt me-2"></i>Open PowerPoint
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-danger text-white h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-file-pdf fa-3x mb-3"></i>
+                                        <h5>Professional PDF</h5>
+                                        <p>High-quality downloadable presentation</p>
+                                        <a href="{{ url_for('circle.download_pdf') }}" 
+                                           class="btn btn-light btn-lg" target="_blank">
+                                            <i class="fas fa-download me-2"></i>Download PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Projections Summary -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0">
+                            <i class="fas fa-calculator me-2"></i>
+                            Financial Projections Summary
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr class="table-primary text-dark">
+                                        <th>Year</th>
+                                        <th>Platform Revenue</th>
+                                        <th>NVC Share (60%)</th>
+                                        <th>Circle Share (40%)</th>
+                                        <th>Key Milestone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>1</strong></td>
+                                        <td>$50M</td>
+                                        <td>$30M</td>
+                                        <td>$20M</td>
+                                        <td>Early Adoption Phase</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>2</strong></td>
+                                        <td>$150M</td>
+                                        <td>$90M</td>
+                                        <td>$60M</td>
+                                        <td>Market Expansion</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>3</strong></td>
+                                        <td>$400M</td>
+                                        <td>$240M</td>
+                                        <td>$160M</td>
+                                        <td>Scale Achievement</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>4</strong></td>
+                                        <td>$750M</td>
+                                        <td>$450M</td>
+                                        <td>$300M</td>
+                                        <td>Market Leadership</td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <td><strong>5</strong></td>
+                                        <td><strong>$1.2B</strong></td>
+                                        <td><strong>$720M</strong></td>
+                                        <td><strong>$480M</strong></td>
+                                        <td><strong>Global Dominance</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

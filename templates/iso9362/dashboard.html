@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}ISO 9362:2022 BIC Management - NVC Banking Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h2><i class="fas fa-globe text-primary"></i> ISO 9362:2022 BIC Management</h2>
+                    <p class="mb-0">Business Identifier Code Registry & SWIFT Integration</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">{{ stats.total_bics }}</h3>
+                            <p class="card-text">Total BIC Codes</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-code fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">{{ stats.active_bics }}</h3>
+                            <p class="card-text">Active BICs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">{{ stats.countries }}</h3>
+                            <p class="card-text">Countries</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-flag fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">{{ stats.institution_types }}</h3>
+                            <p class="card-text">Institution Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h4><i class="fas fa-tools text-primary"></i> BIC Management Tools</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-secondary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                                    <h5>BIC Validation</h5>
+                                    <p>Validate BIC codes according to ISO 9362:2022 standard</p>
+                                    <a href="{{ url_for('iso9362.validate_bic') }}" class="btn btn-primary">Validate BIC</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-secondary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                                    <h5>Register BIC</h5>
+                                    <p>Register new financial institutions in the BIC registry</p>
+                                    <a href="{{ url_for('iso9362.register_bic') }}" class="btn btn-success">Register BIC</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-secondary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-route fa-3x text-warning mb-3"></i>
+                                    <h5>SWIFT Routing</h5>
+                                    <p>Test SWIFT message routing between institutions</p>
+                                    <a href="{{ url_for('iso9362.swift_routing') }}" class="btn btn-warning">Test Routing</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card bg-secondary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-search-location fa-3x text-info mb-3"></i>
+                                    <h5>Search by Country</h5>
+                                    <p>Find BIC codes by country or region</p>
+                                    <a href="{{ url_for('iso9362.search_bics') }}" class="btn btn-info">Search BICs</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card bg-secondary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-handshake fa-3x text-light mb-3"></i>
+                                    <h5>Correspondent Banks</h5>
+                                    <p>Manage correspondent banking relationships</p>
+                                    <a href="{{ url_for('iso9362.correspondent_banks') }}" class="btn btn-light text-dark">View Correspondents</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integration Status -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h4><i class="fas fa-plug text-primary"></i> Integration Status</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <h6>ISO 20022 Integration</h6>
+                                <p class="text-muted">Active</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <h6>SWIFT Network</h6>
+                                <p class="text-muted">Connected</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <h6>Correspondent Banking</h6>
+                                <p class="text-muted">Operational</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

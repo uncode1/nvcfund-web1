@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVC Fund Bank - Circle Strategic Partnership</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #061c38 0%, #1a2a5c 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            padding: 60px 0;
+            display: none;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .slide-content {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 204, 255, 0.3);
+        }
+        
+        .stat-box {
+            background: linear-gradient(45deg, #66ccff, #4a90e2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+            color: #061c38;
+            font-weight: bold;
+        }
+        
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #66ccff;
+        }
+        
+        .revenue-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .revenue-table th {
+            background: #66ccff;
+            color: #061c38;
+            font-weight: bold;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: #66ccff;
+            color: #061c38;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .nav-btn:hover {
+            background: #4a90e2;
+            transform: translateY(-2px);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .partnership-visual {
+            background: linear-gradient(45deg, #66ccff, #4a90e2);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            color: #061c38;
+            text-align: center;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            border-color: #66ccff;
+            transform: translateY(-5px);
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #66ccff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Slide Counter -->
+    <div class="slide-counter">
+        <span id="slideNumber">1</span> / 12
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()"><i class="fas fa-chevron-left"></i></button>
+        <button class="nav-btn" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active" id="slide1">
+        <div class="container">
+            <div class="slide-header text-center">
+                <h1 class="display-3 mb-4">
+                    <i class="fas fa-handshake text-primary me-3"></i>
+                    Strategic Partnership Proposal
+                </h1>
+                <h2 class="h3 text-primary">NVC Fund Bank & Circle: Defining the Future of Institutional Digital Banking</h2>
+            </div>
+            <div class="logo-section">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <div class="stat-box">
+                            <h3>NVC Fund Bank</h3>
+                            <p class="mb-0">$10+ Trillion Assets</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="partnership-visual">
+                            <i class="fas fa-plus fa-3x"></i>
+                            <h4 class="mt-3">Strategic Partnership</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="stat-box">
+                            <h3>Circle</h3>
+                            <p class="mb-0">$40B USDC Infrastructure</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <p class="lead">Confidential Executive Presentation | May 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Executive Summary -->
+    <div class="slide" id="slide2">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-chart-line text-primary me-3"></i>Executive Summary</h1>
+                <h3 class="text-primary">Partnership Vision: Global Digital Banking Leadership</h3>
+            </div>
+            <div class="slide-content">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="benefit-card">
+                            <h4><i class="fas fa-target text-primary"></i> The Opportunity</h4>
+                            <ul>
+                                <li>$500+ trillion traditional banking market ready for digital transformation</li>
+                                <li>Institutional clients demand integrated traditional + digital infrastructure</li>
+                                <li>First-mover advantage in institutional digital banking services</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="benefit-card">
+                            <h4><i class="fas fa-lightbulb text-primary"></i> The Solution</h4>
+                            <ul>
+                                <li><strong>NVC Fund Bank:</strong> Regulated institutional banking authority + $10+ trillion assets</li>
+                                <li><strong>Circle:</strong> Leading stablecoin infrastructure + $40B USDC ecosystem</li>
+                                <li><strong>Combined:</strong> Unmatched institutional digital banking platform</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="benefit-card">
+                            <h4><i class="fas fa-trophy text-primary"></i> The Outcome</h4>
+                            <ul>
+                                <li>Market-leading institutional digital banking platform</li>
+                                <li>$1.2+ billion revenue potential by Year 5</li>
+                                <li>Global dominance in digital finance transformation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: NVC Fund Bank Overview -->
+    <div class="slide" id="slide3">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-university text-primary me-3"></i>NVC Fund Bank Overview</h1>
+                <h3 class="text-primary">The World's Most Comprehensive Institutional Bank</h3>
+            </div>
+            <div class="slide-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-chart-bar text-primary"></i> Financial Scale & Authority</h4>
+                        <div class="stat-box mb-3">
+                            <h5>Total Assets: $10+ trillion under management</h5>
+                        </div>
+                        <div class="stat-box mb-3">
+                            <h5>Market Cap: $1+ trillion institutional holdings</h5>
+                        </div>
+                        <div class="stat-box mb-3">
+                            <h5>Revenue: $289+ billion annual institutional revenue</h5>
+                        </div>
+                        <div class="stat-box">
+                            <h5>Banking Authority: African Union Treaty regulated institution</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-shield-alt text-primary"></i> Core Capabilities</h4>
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <i class="fas fa-globe fa-2x text-primary mb-2"></i>
+                                <p>Correspondent Banking Network</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-coins fa-2x text-primary mb-2"></i>
+                                <p>Treasury & Asset Management ($1T+ AUM)</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-file-contract fa-2x text-primary mb-2"></i>
+                                <p>Trade Finance & SBLC Services</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-exchange-alt fa-2x text-primary mb-2"></i>
+                                <p>Multi-Currency Operations (50+ currencies)</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-network-wired fa-2x text-primary mb-2"></i>
+                                <p>Advanced ISO 20022 Messaging Platform</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-link fa-2x text-primary mb-2"></i>
+                                <p>Blockchain Settlement Infrastructure</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Market Opportunity -->
+    <div class="slide" id="slide4">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-rocket text-primary me-3"></i>Market Opportunity</h1>
+                <h3 class="text-primary">The $500 Trillion Digital Banking Transformation</h3>
+            </div>
+            <div class="slide-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Market Gaps We Address Together</h4>
+                        <div class="benefit-card">
+                            <h5><i class="fas fa-exclamation-triangle text-warning"></i> Traditional Banking Limitations</h5>
+                            <ul>
+                                <li>Slow cross-border settlements (3-5 days)</li>
+                                <li>High correspondent banking fees (0.5-2.0%)</li>
+                                <li>Limited digital asset capabilities</li>
+                                <li>Fragmented global payment rails</li>
+                            </ul>
+                        </div>
+                        <div class="benefit-card">
+                            <h5><i class="fas fa-exclamation-triangle text-warning"></i> Digital Asset Limitations</h5>
+                            <ul>
+                                <li>Lack of traditional banking integration</li>
+                                <li>Limited institutional custody solutions</li>
+                                <li>Regulatory uncertainty and compliance gaps</li>
+                                <li>Insufficient traditional finance connectivity</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Combined Solution Advantages</h4>
+                        <div class="partnership-visual">
+                            <table class="table table-borderless text-dark">
+                                <thead>
+                                    <tr>
+                                        <th>Traditional Banking</th>
+                                        <th>+</th>
+                                        <th>Digital Infrastructure</th>
+                                        <th>=</th>
+                                        <th>Market Leadership</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Regulatory Authority</td>
+                                        <td>+</td>
+                                        <td>USDC Liquidity</td>
+                                        <td>=</td>
+                                        <td>Compliant Innovation</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Institutional Clients</td>
+                                        <td>+</td>
+                                        <td>Technology Platform</td>
+                                        <td>=</td>
+                                        <td>Seamless Experience</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Global Reach</td>
+                                        <td>+</td>
+                                        <td>Multi-Chain Support</td>
+                                        <td>=</td>
+                                        <td>Universal Access</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Risk Management</td>
+                                        <td>+</td>
+                                        <td>Real-Time Settlement</td>
+                                        <td>=</td>
+                                        <td>Superior Service</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Partnership Structure -->
+    <div class="slide" id="slide5">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-handshake text-primary me-3"></i>Strategic Partnership Structure</h1>
+                <h3 class="text-primary">Optimal Partnership Framework</h3>
+            </div>
+            <div class="slide-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Investment & Ownership</h4>
+                        <div class="stat-box mb-3">
+                            <h5>NVC Investment: $1.5 billion for 25% Circle equity stake</h5>
+                        </div>
+                        <div class="stat-box mb-3">
+                            <h5>Joint Venture: NVC-Circle Digital Banking Platform</h5>
+                        </div>
+                        <div class="stat-box mb-3">
+                            <h5>Governance: Joint board representation and shared decision-making</h5>
+                        </div>
+                        <div class="stat-box">
+                            <h5>Timeline: 5-year strategic partnership with renewal options</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Revenue Sharing Model</h4>
+                        <table class="table revenue-table">
+                            <thead>
+                                <tr>
+                                    <th>Service Category</th>
+                                    <th>NVC Share</th>
+                                    <th>Circle Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>USDC Services</td>
+                                    <td>60%</td>
+                                    <td>40%</td>
+                                </tr>
+                                <tr>
+                                    <td>Payment Processing</td>
+                                    <td>70%</td>
+                                    <td>30%</td>
+                                </tr>
+                                <tr>
+                                    <td>Treasury Management</td>
+                                    <td>65%</td>
+                                    <td>35%</td>
+                                </tr>
+                                <tr>
+                                    <td>Digital Asset Custody</td>
+                                    <td>55%</td>
+                                    <td>45%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h4>Joint Platform Services</h4>
+                        <div class="partnership-visual">
+                            <h5>NVC-Circle Digital Banking Platform Services</h5>
+                            <div class="feature-grid">
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-university fa-2x text-primary mb-2"></i>
+                                    <p>USDC Treasury Services</p>
+                                </div>
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-globe fa-2x text-primary mb-2"></i>
+                                    <p>Cross-Border Payments</p>
+                                </div>
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-lock fa-2x text-primary mb-2"></i>
+                                    <p>Digital Asset Custody</p>
+                                </div>
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-file-contract fa-2x text-primary mb-2"></i>
+                                    <p>Trade Finance Solutions</p>
+                                </div>
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-coins fa-2x text-primary mb-2"></i>
+                                    <p>Yield & Investment Products</p>
+                                </div>
+                                <div class="feature-item bg-light text-dark">
+                                    <i class="fas fa-building fa-2x text-primary mb-2"></i>
+                                    <p>CBDC Infrastructure</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Financial Projections -->
+    <div class="slide" id="slide6">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-chart-line text-primary me-3"></i>Financial Projections</h1>
+                <h3 class="text-primary">Revenue Growth Trajectory</h3>
+            </div>
+            <div class="slide-content">
+                <h4>5-Year Partnership Revenue Projections</h4>
+                <table class="table revenue-table mt-4">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Platform Revenue</th>
+                            <th>NVC Share (60%)</th>
+                            <th>Circle Share (40%)</th>
+                            <th>Total Market</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>$50M</td>
+                            <td>$30M</td>
+                            <td>$20M</td>
+                            <td>Early Adoption</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>$150M</td>
+                            <td>$90M</td>
+                            <td>$60M</td>
+                            <td>Market Expansion</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>$400M</td>
+                            <td>$240M</td>
+                            <td>$160M</td>
+                            <td>Scale Achievement</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>$750M</td>
+                            <td>$450M</td>
+                            <td>$300M</td>
+                            <td>Market Leadership</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>$1.2B</td>
+                            <td>$720M</td>
+                            <td>$480M</td>
+                            <td>Global Dominance</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Key Performance Metrics</h4>
+                        <div class="stat-box mb-2">Assets Under Management: $50B+ by Year 3</div>
+                        <div class="stat-box mb-2">Institutional Clients: 1,000+ by Year 2</div>
+                        <div class="stat-box mb-2">Transaction Volume: $500B+ annually by Year 5</div>
+                        <div class="stat-box">Market Share: 15%+ of institutional digital banking</div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Value Creation Sources</h4>
+                        <div class="benefit-card">
+                            <h6><i class="fas fa-dollar-sign text-primary"></i> Fee Revenue</h6>
+                            <p>Custody, transaction, and management fees</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h6><i class="fas fa-chart-area text-primary"></i> Spread Income</h6>
+                            <p>Treasury and yield product margins</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h6><i class="fas fa-cogs text-primary"></i> Technology Licensing</h6>
+                            <p>Platform licensing to other institutions</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h6><i class="fas fa-lightbulb text-primary"></i> Advisory Services</h6>
+                            <p>Digital transformation consulting</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue with remaining slides... -->
+    <!-- Slide 7: Implementation Roadmap -->
+    <div class="slide" id="slide7">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-road text-primary me-3"></i>Implementation Roadmap</h1>
+                <h3 class="text-primary">Strategic Partnership Execution Plan</h3>
+            </div>
+            <div class="slide-content">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4><i class="fas fa-foundation text-primary"></i> Phase 1: Foundation (Months 1-6)</h4>
+                        <h6>Objectives: Legal framework and initial integration</h6>
+                        <ul>
+                            <li>✅ Investment closing and governance structure</li>
+                            <li>✅ API integration and technical connectivity</li>
+                            <li>✅ Regulatory approvals and compliance framework</li>
+                            <li>✅ Joint team formation and operational setup</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4><i class="fas fa-rocket text-primary"></i> Phase 2: Platform Launch (Months 6-12)</h4>
+                        <h6>Objectives: Joint platform development and pilot clients</h6>
+                        <ul>
+                            <li>🚀 NVC-Circle platform soft launch</li>
+                            <li>🏦 Pilot program with 50 institutional clients</li>
+                            <li>📈 Initial product suite rollout</li>
+                            <li>📊 Performance metrics establishment</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4><i class="fas fa-expand text-primary"></i> Phase 3: Market Expansion (Months 12-24)</h4>
+                        <h6>Objectives: Scale operations and market penetration</h6>
+                        <ul>
+                            <li>🌍 Global platform rollout</li>
+                            <li>📱 Advanced product development</li>
+                            <li>🤝 Strategic client acquisition (500+ institutions)</li>
+                            <li>💰 Revenue optimization and growth</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4><i class="fas fa-crown text-primary"></i> Phase 4: Market Leadership (Months 24-60)</h4>
+                        <h6>Objectives: Achieve dominant market position</h6>
+                        <ul>
+                            <li>👑 Market leadership establishment</li>
+                            <li>🔬 Innovation pipeline execution</li>
+                            <li>🌐 Global expansion completion</li>
+                            <li>📈 $1B+ annual revenue achievement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Call to Action -->
+    <div class="slide" id="slide8">
+        <div class="container">
+            <div class="slide-header">
+                <h1><i class="fas fa-bullhorn text-primary me-3"></i>Call to Action</h1>
+                <h3 class="text-primary">Partnership Proposal</h3>
+            </div>
+            <div class="slide-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="partnership-visual">
+                            <h4>PARTNERSHIP TERMS</h4>
+                            <table class="table table-borderless text-dark">
+                                <tr>
+                                    <td><strong>Investment Amount:</strong></td>
+                                    <td>$1.5 Billion</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Equity Stake:</strong></td>
+                                    <td>25% of Circle</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Board Seats:</strong></td>
+                                    <td>3 of 7 board positions</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Joint Venture:</strong></td>
+                                    <td>60% NVC / 40% Circle ownership</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Revenue Target:</strong></td>
+                                    <td>$1.2B by Year 5</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Timeline:</strong></td>
+                                    <td>5-year strategic partnership</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Strategic Vision</h4>
+                        <div class="benefit-card">
+                            <p class="lead">
+                                Together, NVC Fund Bank and Circle will create the world's most advanced institutional digital banking platform, 
+                                combining traditional banking authority with cutting-edge blockchain infrastructure to serve the global transition to digital finance.
+                            </p>
+                        </div>
+                        <h4>Immediate Next Steps</h4>
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                                <p><strong>Executive Leadership Meeting</strong><br>CEO-level strategic alignment discussion</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-file-signature fa-2x text-primary mb-2"></i>
+                                <p><strong>Non-Disclosure Agreement</strong><br>Execute comprehensive confidentiality framework</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
+                                <p><strong>Preliminary Term Sheet</strong><br>Agree on basic partnership structure and terms</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-search fa-2x text-primary mb-2"></i>
+                                <p><strong>Due Diligence Launch</strong><br>Begin comprehensive evaluation process</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 8;
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide${currentSlide}`).classList.add('active');
+            document.getElementById('slideNumber').textContent = currentSlide;
+        }
+        
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+        
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+        
+        // Auto-advance slides (optional)
+        // setInterval(nextSlide, 30000); // Advance every 30 seconds
+    </script>
+</body>
+</html>

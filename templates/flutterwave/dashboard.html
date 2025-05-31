@@ -1,0 +1,395 @@
+{% extends 'layout.html' %}
+
+{% block title %}Flutterwave Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .flutterwave-card {
+        background: linear-gradient(135deg, #f9a825 0%, #f57f17 100%);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stats-card {
+        transition: all 0.3s;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .stats-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .feature-card {
+        transition: all 0.3s;
+        cursor: pointer;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #f9a825;
+    }
+    .transaction-table th {
+        background-color: #f9a825;
+        color: white;
+        border: none;
+    }
+    .badge-flutterwave {
+        background-color: #f9a825;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Flutterwave Header -->
+    <div class="flutterwave-card mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-bolt me-2"></i> Flutterwave Payment Gateway
+                </h1>
+                <p class="lead mb-0">
+                    African payment solutions with global reach - Accept payments, send money, and create virtual accounts
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <i class="fas fa-globe-africa" style="font-size: 4rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card feature-card h-100 text-center" onclick="location.href='{{ url_for('flutterwave_web.create_payment_form') }}'">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h5 class="card-title">Create Payment</h5>
+                    <p class="card-text">Generate payment links for card, mobile money, and bank transfers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card feature-card h-100 text-center" onclick="showVirtualAccountModal()">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h5 class="card-title">Virtual Account</h5>
+                    <p class="card-text">Create dedicated virtual accounts for collecting payments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card feature-card h-100 text-center" onclick="showTransferModal()">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <h5 class="card-title">Send Money</h5>
+                    <p class="card-text">Transfer funds to bank accounts and mobile money wallets</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card feature-card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <h5 class="card-title">Bank Directory</h5>
+                    <p class="card-text">Browse supported banks and verify account details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stats-value">{{ transactions|length }}</div>
+                    <div>Recent Transactions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-value">{{ transactions|selectattr('status', 'equalto', 'COMPLETED')|list|length }}</div>
+                    <div>Successful Payments</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-value">{{ transactions|selectattr('status', 'equalto', 'PENDING')|list|length }}</div>
+                    <div>Pending Payments</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                    <div class="stats-icon">
+                        <i class="fas fa-globe-africa"></i>
+                    </div>
+                    <div class="stats-value">30+</div>
+                    <div>African Countries</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i> Recent Flutterwave Transactions
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>
+                                <code>{{ transaction.transaction_id[:15] }}...</code>
+                            </td>
+                            <td>{{ "%.2f"|format(transaction.amount) }}</td>
+                            <td>
+                                <span class="badge badge-flutterwave">{{ transaction.currency }}</span>
+                            </td>
+                            <td>
+                                {% if transaction.status == 'COMPLETED' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% elif transaction.status == 'PENDING' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif transaction.status == 'FAILED' %}
+                                <span class="badge bg-danger">Failed</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') if transaction.created_at else 'N/A' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewTransaction('{{ transaction.transaction_id }}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                <h5>No transactions yet</h5>
+                <p class="text-muted">Start accepting payments through Flutterwave to see transaction history here.</p>
+                <a href="{{ url_for('flutterwave_web.create_payment_form') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Create First Payment
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Virtual Account Modal -->
+<div class="modal fade" id="virtualAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Virtual Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="virtualAccountForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" name="firstname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" name="lastname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_permanent" checked>
+                            <label class="form-check-label">Permanent account</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createVirtualAccount()">Create Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Money</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="transferForm">
+                    <div class="mb-3">
+                        <label class="form-label">Bank Code</label>
+                        <input type="text" class="form-control" name="account_bank" placeholder="e.g., 044" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Number</label>
+                        <input type="text" class="form-control" name="account_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Currency</label>
+                        <select class="form-control" name="currency">
+                            <option value="NGN">Nigerian Naira (NGN)</option>
+                            <option value="GHS">Ghanaian Cedi (GHS)</option>
+                            <option value="KES">Kenyan Shilling (KES)</option>
+                            <option value="USD">US Dollar (USD)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Narration</label>
+                        <input type="text" class="form-control" name="narration" placeholder="Transfer description">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="initiateTransfer()">Send Money</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showVirtualAccountModal() {
+    new bootstrap.Modal(document.getElementById('virtualAccountModal')).show();
+}
+
+function showTransferModal() {
+    new bootstrap.Modal(document.getElementById('transferModal')).show();
+}
+
+function createVirtualAccount() {
+    const form = document.getElementById('virtualAccountForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/api/flutterwave/create-virtual-account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Virtual account created successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('virtualAccountModal')).hide();
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to create virtual account');
+    });
+}
+
+function initiateTransfer() {
+    const form = document.getElementById('transferForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/api/flutterwave/initiate-transfer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Transfer initiated successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to initiate transfer');
+    });
+}
+
+function viewTransaction(transactionId) {
+    console.log('View transaction:', transactionId);
+}
+</script>
+{% endblock %}

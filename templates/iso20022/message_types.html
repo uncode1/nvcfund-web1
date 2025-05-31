@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block title %}ISO 20022 Message Types - NVC Banking Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">ISO 20022 Message Types</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('web.main.index') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('iso20022.dashboard') }}">ISO 20022</a></li>
+                        <li class="breadcrumb-item active">Message Types</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Message Types Overview -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-dark text-white shadow-sm border-light">
+                        <div class="card-header" style="background-color: #0d47a1; color: white;">
+                            <h5 class="card-title mb-0 fw-bold">
+                                <i class="fas fa-list-alt me-2"></i>Supported Message Types
+                            </h5>
+                        </div>
+                        <div class="card-body" style="background-color: #1a1a1a;">
+                            <p class="card-text text-light fs-6">
+                                NVC Fund Bank supports the following ISO 20022 message types for international financial messaging:
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Messages -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card bg-dark text-white shadow-sm h-100 border-light">
+                        <div class="card-header" style="background-color: #1b5e20; color: white;">
+                            <h6 class="card-title mb-0 fw-bold">
+                                <i class="fas fa-money-bill-wave me-2"></i>Payment Messages (pain)
+                            </h6>
+                        </div>
+                        <div class="card-body" style="background-color: #1a1a1a;">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">pain.001.001.03</strong><br>
+                                    <small style="color: #b0b0b0;">Customer Credit Transfer Initiation</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">pain.002.001.03</strong><br>
+                                    <small style="color: #b0b0b0;">Payment Status Report</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">pain.008.001.02</strong><br>
+                                    <small style="color: #b0b0b0;">Customer Direct Debit Initiation</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Management Messages -->
+                <div class="col-md-6">
+                    <div class="card bg-dark text-white shadow-sm h-100 border-light">
+                        <div class="card-header" style="background-color: #01579b; color: white;">
+                            <h6 class="card-title mb-0 fw-bold">
+                                <i class="fas fa-file-alt me-2"></i>Account Management (camt)
+                            </h6>
+                        </div>
+                        <div class="card-body" style="background-color: #1a1a1a;">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">camt.052.001.02</strong><br>
+                                    <small style="color: #b0b0b0;">Bank to Customer Account Report</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">camt.053.001.02</strong><br>
+                                    <small style="color: #b0b0b0;">Bank to Customer Statement</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                                <div class="list-group-item border-light" style="background-color: #2a2a2a; color: white;">
+                                    <strong class="text-white">camt.054.001.02</strong><br>
+                                    <small style="color: #b0b0b0;">Bank to Customer Debit Credit Notification</small>
+                                    <span class="badge ms-2" style="background-color: #2e7d32; color: white;">Supported</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Status -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bg-dark text-white shadow-sm border-light">
+                        <div class="card-header" style="background-color: #424242; color: white;">
+                            <h6 class="card-title mb-0 fw-bold">
+                                <i class="fas fa-cogs me-2"></i>Implementation Status
+                            </h6>
+                        </div>
+                        <div class="card-body" style="background-color: #1a1a1a;">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="display-6" style="color: #4caf50;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h6 class="mt-2 text-white">Payment Initiation</h6>
+                                        <p class="small" style="color: #b0b0b0;">pain.001.001.03 fully implemented</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="display-6" style="color: #4caf50;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h6 class="mt-2 text-white">Status Reports</h6>
+                                        <p class="small" style="color: #b0b0b0;">pain.002 fully implemented</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="display-6" style="color: #4caf50;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h6 class="mt-2 text-white">Account Statements</h6>
+                                        <p class="small" style="color: #b0b0b0;">camt.053 fully implemented</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('iso20022.dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                        <a href="{{ url_for('iso20022.create_payment') }}" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Create Payment Message
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

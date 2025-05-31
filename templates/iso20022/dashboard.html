@@ -1,0 +1,212 @@
+{% extends 'layout.html' %}
+
+{% block title %}ISO 20022 Financial Messaging - NVC Bank{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-white">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    ISO 20022 Financial Messaging
+                </h1>
+                <div class="text-muted">
+                    Global Financial Messaging Standards
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <h5 class="text-white">System Status</h5>
+                    <p class="text-success mb-0">Active</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-globe text-primary fa-2x mb-2"></i>
+                    <h5 class="text-white">BIC Code</h5>
+                    <p class="text-primary mb-0">NVCFBKAU</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-paper-plane text-info fa-2x mb-2"></i>
+                    <h5 class="text-white">Messages Today</h5>
+                    <p class="text-info mb-0">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt text-warning fa-2x mb-2"></i>
+                    <h5 class="text-white">Compliance</h5>
+                    <p class="text-warning mb-0">ISO 20022</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('iso20022.create_payment') }}" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-plus-circle fa-2x d-block mb-2"></i>
+                                <strong>Create Payment</strong><br>
+                                <small>Generate ISO 20022 payment message</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('iso20022.process_message') }}" class="btn btn-info w-100 py-3">
+                                <i class="fas fa-cogs fa-2x d-block mb-2"></i>
+                                <strong>Process Message</strong><br>
+                                <small>Handle incoming ISO 20022 messages</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('iso20022.payment_status') }}" class="btn btn-warning w-100 py-3">
+                                <i class="fas fa-clipboard-check fa-2x d-block mb-2"></i>
+                                <strong>Payment Status Report</strong><br>
+                                <small>Generate payment status messages</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('iso20022.account_statement') }}" class="btn btn-success w-100 py-3">
+                                <i class="fas fa-file-invoice fa-2x d-block mb-2"></i>
+                                <strong>Account Statement</strong><br>
+                                <small>Create ISO 20022 account statement</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Types Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Supported Message Types
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Payment Messages</h5>
+                            <ul class="list-unstyled text-white">
+                                <li><i class="fas fa-check text-success me-2"></i>pain.001 - Customer Credit Transfer</li>
+                                <li><i class="fas fa-check text-success me-2"></i>pain.002 - Payment Status Report</li>
+                                <li><i class="fas fa-check text-success me-2"></i>pain.007 - Payment Reversal</li>
+                                <li><i class="fas fa-check text-success me-2"></i>pain.008 - Direct Debit</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Cash Management</h5>
+                            <ul class="list-unstyled text-white">
+                                <li><i class="fas fa-check text-success me-2"></i>camt.052 - Account Report</li>
+                                <li><i class="fas fa-check text-success me-2"></i>camt.053 - Account Statement</li>
+                                <li><i class="fas fa-check text-success me-2"></i>camt.054 - Debit/Credit Notification</li>
+                                <li><i class="fas fa-check text-success me-2"></i>camt.056 - Payment Cancellation</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('iso20022.message_types') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-2"></i>
+                            View All Message Types
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benefits Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        ISO 20022 Benefits for NVC Bank
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-globe-americas text-primary fa-3x mb-3"></i>
+                                <h5 class="text-white">Global Interoperability</h5>
+                                <p class="text-muted">Seamless communication with banks and payment systems worldwide</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-database text-success fa-3x mb-3"></i>
+                                <h5 class="text-white">Rich Data Content</h5>
+                                <p class="text-muted">Enhanced transaction data for better compliance and analytics</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-shield-check text-warning fa-3x mb-3"></i>
+                                <h5 class="text-white">Regulatory Compliance</h5>
+                                <p class="text-muted">Meet global regulatory requirements and standards</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid #66ccff;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 204, 255, 0.3);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.fa-2x, .fa-3x {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+</style>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block title %}Create Account Statement - ISO 20022{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Create Account Statement</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('web.main.index') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('iso20022.dashboard') }}">ISO 20022</a></li>
+                        <li class="breadcrumb-item active">Account Statement</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card bg-dark text-white shadow-sm border-light">
+                        <div class="card-header" style="background-color: #01579b; color: white;">
+                            <h5 class="card-title mb-0 fw-bold">
+                                <i class="fas fa-file-invoice me-2"></i>Account Statement (camt.053.001.02)
+                            </h5>
+                        </div>
+                        <div class="card-body" style="background-color: #1a1a1a;">
+                            <form method="POST" action="{{ url_for('iso20022.account_statement') }}">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="account_number" class="form-label text-white">Account Number/IBAN</label>
+                                            <input type="text" class="form-control bg-dark text-white border-secondary" 
+                                                   id="account_number" name="account_number" required
+                                                   placeholder="e.g., GL89NVCT0000000000000001">
+                                            <div class="form-text text-muted">Account identifier or IBAN</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="start_date" class="form-label text-white">Start Date</label>
+                                            <input type="date" class="form-control bg-dark text-white border-secondary" 
+                                                   id="start_date" name="start_date" required>
+                                            <div class="form-text text-muted">Statement period start date</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="end_date" class="form-label text-white">End Date</label>
+                                            <input type="date" class="form-control bg-dark text-white border-secondary" 
+                                                   id="end_date" name="end_date" required>
+                                            <div class="form-text text-muted">Statement period end date</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="currency" class="form-label text-white">Currency</label>
+                                            <select class="form-select bg-dark text-white border-secondary" 
+                                                    id="currency" name="currency" required>
+                                                <option value="USD">USD - US Dollar</option>
+                                                <option value="EUR">EUR - Euro</option>
+                                                <option value="GBP">GBP - British Pound</option>
+                                                <option value="NVCT">NVCT - NVC Token</option>
+                                                <option value="AFD1">AFD1 - American Federation Dollar</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="statement_type" class="form-label text-white">Statement Type</label>
+                                            <select class="form-select bg-dark text-white border-secondary" 
+                                                    id="statement_type" name="statement_type" required>
+                                                <option value="FULL">Full Statement</option>
+                                                <option value="INTERIM">Interim Statement</option>
+                                                <option value="OPENING">Opening Statement</option>
+                                                <option value="CLOSING">Closing Statement</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-file-export me-1"></i> Generate Statement
+                                    </button>
+                                    <a href="{{ url_for('iso20022.dashboard') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

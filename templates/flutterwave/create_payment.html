@@ -1,0 +1,245 @@
+{% extends 'layout.html' %}
+
+{% block title %}Create Flutterwave Payment{% endblock %}
+
+{% block styles %}
+<style>
+    .flutterwave-header {
+        background: linear-gradient(135deg, #f9a825 0%, #f57f17 100%);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .payment-form-card {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    .btn-flutterwave {
+        background: linear-gradient(135deg, #f9a825 0%, #f57f17 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+    }
+    .btn-flutterwave:hover {
+        background: linear-gradient(135deg, #f57f17 0%, #e65100 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .payment-options {
+        border: 2px solid #f9a825;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .payment-option-badge {
+        background-color: #f9a825;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        margin: 0.2rem;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="flutterwave-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-credit-card me-2"></i> Create Payment Link
+                </h1>
+                <p class="lead mb-0">
+                    Generate secure payment links for cards, mobile money, and bank transfers across Africa
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <i class="fas fa-link" style="font-size: 4rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card payment-form-card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-wave me-2 text-warning"></i> Payment Details
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <!-- Payment Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">Amount *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </span>
+                                    <input type="number" class="form-control" id="amount" name="amount" 
+                                           step="0.01" min="1" required>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please enter a valid amount.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="currency" class="form-label">Currency *</label>
+                                <select class="form-select" id="currency" name="currency" required>
+                                    <option value="">Select Currency</option>
+                                    <option value="NGN">Nigerian Naira (NGN)</option>
+                                    <option value="GHS">Ghanaian Cedi (GHS)</option>
+                                    <option value="KES">Kenyan Shilling (KES)</option>
+                                    <option value="ZAR">South African Rand (ZAR)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                    <option value="EUR">Euro (EUR)</option>
+                                    <option value="GBP">British Pound (GBP)</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a currency.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Payment Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2" 
+                                      placeholder="Brief description of what this payment is for"></textarea>
+                        </div>
+
+                        <!-- Customer Information -->
+                        <h6 class="mb-3">
+                            <i class="fas fa-user me-2 text-primary"></i> Customer Information
+                        </h6>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="customer_name" class="form-label">Customer Name *</label>
+                                <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                                <div class="invalid-feedback">
+                                    Customer name is required.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customer_email" class="form-label">Customer Email *</label>
+                                <input type="email" class="form-control" id="customer_email" name="customer_email" required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid email address.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="customer_phone" class="form-label">Customer Phone Number</label>
+                            <input type="tel" class="form-control" id="customer_phone" name="customer_phone" 
+                                   placeholder="+234xxxxxxxxxx">
+                            <div class="form-text">Include country code for international numbers</div>
+                        </div>
+
+                        <!-- Payment Options -->
+                        <div class="payment-options">
+                            <h6 class="mb-3">
+                                <i class="fas fa-cogs me-2"></i> Available Payment Methods
+                            </h6>
+                            <div class="d-flex flex-wrap">
+                                <span class="payment-option-badge">
+                                    <i class="fas fa-credit-card me-1"></i> Card Payments
+                                </span>
+                                <span class="payment-option-badge">
+                                    <i class="fas fa-mobile-alt me-1"></i> Mobile Money
+                                </span>
+                                <span class="payment-option-badge">
+                                    <i class="fas fa-university me-1"></i> Bank Transfer
+                                </span>
+                                <span class="payment-option-badge">
+                                    <i class="fas fa-qrcode me-1"></i> USSD
+                                </span>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">
+                                Customers can choose their preferred payment method on the checkout page
+                            </p>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-flutterwave btn-lg">
+                                <i class="fas fa-link me-2"></i> Generate Payment Link
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Cards -->
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <h6>Secure Payments</h6>
+                            <p class="text-muted small mb-0">
+                                All transactions are secured with industry-standard encryption
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <i class="fas fa-globe-africa fa-2x text-info mb-2"></i>
+                            <h6>Pan-African Coverage</h6>
+                            <p class="text-muted small mb-0">
+                                Accept payments from customers across 30+ African countries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Auto-format phone number
+document.getElementById('customer_phone').addEventListener('input', function(e) {
+    let value = e.target.value;
+    // Remove all non-numeric characters except +
+    value = value.replace(/[^\d+]/g, '');
+    // Ensure it starts with + if it's an international number
+    if (value.length > 0 && !value.startsWith('+')) {
+        value = '+' + value;
+    }
+    e.target.value = value;
+});
+</script>
+{% endblock %}

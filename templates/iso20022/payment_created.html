@@ -1,0 +1,307 @@
+{% extends 'layout.html' %}
+
+{% block title %}ISO 20022 Payment Created - NVC Bank{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-white">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    ISO 20022 Payment Message Created
+                </h1>
+                <div>
+                    <a href="{{ url_for('iso20022.create_payment') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-plus me-2"></i>Create Another
+                    </a>
+                    <a href="{{ url_for('iso20022.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success border-success">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="alert-heading text-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Payment Message Generated Successfully
+                        </h4>
+                        <p class="mb-2">Your ISO 20022 CustomerCreditTransferInitiation message has been created and is ready for transmission to the global payment network.</p>
+                        <hr class="border-success">
+                        <p class="mb-0 small">Message ID: <strong>{{ payment_data.instruction_id }}</strong></p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="h2 text-success mb-0">€{{ payment_data.amount }}</div>
+                        <div class="text-muted">{{ payment_data.currency }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Payment Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-dark table-borderless">
+                        <tr>
+                            <td class="text-muted">Instruction ID:</td>
+                            <td class="text-white">{{ payment_data.instruction_id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">End-to-End ID:</td>
+                            <td class="text-white">{{ payment_data.end_to_end_id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Beneficiary:</td>
+                            <td class="text-white">{{ payment_data.creditor_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">IBAN:</td>
+                            <td class="text-white">{{ payment_data.creditor_iban }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">BIC:</td>
+                            <td class="text-white">{{ payment_data.creditor_bank_bic }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Amount:</td>
+                            <td class="text-white">{{ payment_data.currency }} {{ payment_data.amount }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Purpose:</td>
+                            <td class="text-white">{{ payment_data.purpose_code }} - Trade Settlement</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card bg-dark border-info">
+                <div class="card-header bg-info">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Message Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-dark table-borderless">
+                        <tr>
+                            <td class="text-muted">Message Type:</td>
+                            <td class="text-white">pain.001.001.03</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Standard:</td>
+                            <td class="text-white">ISO 20022</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Originator BIC:</td>
+                            <td class="text-white">NVCFGLGL</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Originator:</td>
+                            <td class="text-white">NVC Fund Holding Trust</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Service Level:</td>
+                            <td class="text-white">SEPA Credit Transfer</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Status:</td>
+                            <td class="text-success">Ready for Transmission</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remittance Information -->
+    {% if payment_data.remittance_info %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comment-alt me-2"></i>
+                        Remittance Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-white mb-0">{{ payment_data.remittance_info }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Generated XML Message -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark border-success">
+                <div class="card-header bg-success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="text-white mb-0">
+                            <i class="fas fa-code me-2"></i>
+                            Generated ISO 20022 XML Message
+                        </h5>
+                        <button class="btn btn-outline-light btn-sm" onclick="copyToClipboard()">
+                            <i class="fas fa-copy me-1"></i>Copy XML
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="bg-dark border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                        <pre class="text-success mb-0" id="xmlContent"><code>{{ xml_message }}</code></pre>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn btn-success me-2" onclick="downloadXML()">
+                            <i class="fas fa-download me-2"></i>Download XML File
+                        </button>
+                        <button class="btn btn-outline-success" onclick="validateMessage()">
+                            <i class="fas fa-check-double me-2"></i>Validate Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Next Steps
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-paper-plane text-primary fa-2x mb-2"></i>
+                                <h6 class="text-white">1. Transmit Message</h6>
+                                <p class="text-muted small">Send the XML message through SWIFT network or API integration</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-clock text-info fa-2x mb-2"></i>
+                                <h6 class="text-white">2. Monitor Status</h6>
+                                <p class="text-muted small">Track payment status through pain.002 status reports</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                <h6 class="text-white">3. Settlement</h6>
+                                <p class="text-muted small">Receive settlement confirmation and update account balances</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table-dark td {
+    border: none;
+    padding: 0.5rem 0.75rem;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+pre code {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+#xmlContent {
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+
+<script>
+function copyToClipboard() {
+    const xmlContent = document.getElementById('xmlContent').textContent;
+    navigator.clipboard.writeText(xmlContent).then(function() {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.remove('btn-outline-light');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-light');
+        }, 2000);
+    });
+}
+
+function downloadXML() {
+    const xmlContent = document.getElementById('xmlContent').textContent;
+    const instructionId = '{{ payment_data.instruction_id }}';
+    const blob = new Blob([xmlContent], { type: 'application/xml' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ISO20022_Payment_${instructionId}.xml`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function validateMessage() {
+    const xmlContent = document.getElementById('xmlContent').textContent;
+    
+    fetch('/iso20022/validate-message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'xml_content=' + encodeURIComponent(xmlContent) + '&message_type=pain.001.001.03'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.is_valid) {
+            alert('✅ Message validation successful! The ISO 20022 message is properly formatted.');
+        } else {
+            alert('❌ Validation failed:\n' + data.errors.join('\n'));
+        }
+    })
+    .catch(error => {
+        alert('Error validating message: ' + error);
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Center - NVC Fund Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --nvc-dark-bg: #3e4651;
+            --nvc-card-bg: #2d3748;
+            --nvc-text-light: #ffffff;
+            --nvc-text-muted: #a0aec0;
+            --nvc-accent-blue: #3182ce;
+            --nvc-accent-green: #38a169;
+            --nvc-accent-purple: #805ad5;
+            --nvc-accent-orange: #dd6b20;
+            --nvc-accent-red: #e53e3e;
+            --nvc-accent-teal: #319795;
+            --nvc-accent-cyan: #0bc5ea;
+            --nvc-accent-pink: #d53f8c;
+        }
+        
+        body {
+            background-color: var(--nvc-dark-bg);
+            color: var(--nvc-text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .documentation-header {
+            background: var(--nvc-dark-bg);
+            color: var(--nvc-text-light);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .documentation-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+        
+        .documentation-header .lead {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .stats-card {
+            background: var(--nvc-card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #4a5f7a;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--nvc-accent-blue);
+        }
+        
+        .doc-card {
+            background: var(--nvc-card-bg);
+            border: 1px solid #4a5f7a;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .doc-card-header {
+            color: white;
+            padding: 1.25rem;
+            border-bottom: none;
+        }
+        
+        .doc-card-header.pdf-report {
+            background: linear-gradient(135deg, var(--nvc-accent-blue), #2c5aa0);
+        }
+        
+        .doc-card-header.operational-guide {
+            background: linear-gradient(135deg, var(--nvc-accent-green), #2f7d5b);
+        }
+        
+        .doc-card-header.system-doc {
+            background: linear-gradient(135deg, var(--nvc-accent-purple), #6b46c1);
+        }
+        
+        .doc-card-header.swift-doc {
+            background: linear-gradient(135deg, var(--nvc-accent-teal), #2c7a7b);
+        }
+        
+        .doc-card-header.financial-doc {
+            background: linear-gradient(135deg, var(--nvc-accent-orange), #c05621);
+        }
+        
+        .doc-card-header.compliance-doc {
+            background: linear-gradient(135deg, var(--nvc-accent-cyan), #0891b2);
+        }
+        
+        .doc-card-header h5 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        .doc-card-body {
+            padding: 1.5rem;
+            color: var(--nvc-text-light);
+        }
+        
+        .category-badge {
+            background: var(--nvc-accent-blue);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .download-btn {
+            background: var(--nvc-accent-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .download-btn:hover {
+            background: #2980b9;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        
+        .access-btn {
+            background: var(--nvc-accent-teal);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .access-btn:hover {
+            background: #16a085;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        
+        .section-title {
+            color: var(--nvc-text-light);
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--nvc-accent-blue);
+            position: relative;
+        }
+        
+        .section-title i {
+            color: var(--nvc-accent-blue);
+            margin-right: 0.5rem;
+        }
+        
+        .quick-access {
+            background: var(--nvc-card-bg);
+            border: 1px solid #4a5f7a;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .quick-access-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: var(--nvc-dark-bg);
+            margin-bottom: 1rem;
+            border: 1px solid #4a5f7a;
+        }
+        
+        .quick-access-item:hover {
+            background: var(--nvc-accent-blue);
+            color: white;
+            transform: translateY(-2px);
+            border-color: var(--nvc-accent-blue);
+        }
+        
+        .quick-access-item i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--nvc-accent-blue);
+        }
+        
+        .quick-access-item:hover i {
+            color: white;
+        }
+        
+        .quick-access-item .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-access-item .label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .return-btn {
+            background: var(--nvc-gray);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 2rem;
+        }
+        
+        .return-btn:hover {
+            background: #7f8c8d;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        .card-text {
+            color: var(--nvc-text-muted);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .documentation-header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-number {
+                font-size: 2rem;
+            }
+            
+            .doc-card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="documentation-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-book-open me-3"></i>Documentation Center</h1>
+                    <p class="lead">NVC Fund Bank - Comprehensive Resource Library</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ (dual_format_docs|length) + (operational_guides|length) + (system_docs|length) }}</div>
+                        <div>Available Resources</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Executive Reports Section -->
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title"><i class="fas fa-file-pdf"></i>Executive Reports & Documentation</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for doc in dual_format_docs %}
+            <div class="col-md-6">
+                <div class="doc-card">
+                    <div class="doc-card-header pdf-report">
+                        <h5><i class="fas fa-file-alt me-2"></i>{{ doc.title }}</h5>
+                    </div>
+                    <div class="doc-card-body">
+                        <p class="card-text">{{ doc.description }}</p>
+                        <div class="category-badge">{{ doc.category }}</div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <a href="{{ doc.html_url }}" class="access-btn w-100 text-center">
+                                        <i class="fas fa-eye me-2"></i>View HTML
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{{ url_for('static', filename=doc.pdf_file) }}" class="download-btn w-100 text-center" target="_blank">
+                                        <i class="fas fa-download me-2"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Operational Guides Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2 class="section-title"><i class="fas fa-cogs"></i>Operational Guides & Manuals</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for guide in operational_guides %}
+            <div class="col-md-6">
+                <div class="doc-card">
+                    <div class="doc-card-header operational-guide">
+                        <h5><i class="fas fa-book me-2"></i>{{ guide.title }}</h5>
+                    </div>
+                    <div class="doc-card-body">
+                        <p class="card-text">{{ guide.description }}</p>
+                        <div class="category-badge">{{ guide.category }}</div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <a href="{{ guide.html_url }}" class="access-btn w-100 text-center">
+                                        <i class="fas fa-eye me-2"></i>View HTML
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{{ url_for('static', filename=guide.pdf_file) }}" class="download-btn w-100 text-center" target="_blank">
+                                        <i class="fas fa-download me-2"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- System Documentation Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2 class="section-title"><i class="fas fa-code"></i>System Documentation & Standards</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for doc in system_docs %}
+            <div class="col-md-6">
+                <div class="doc-card">
+                    <div class="doc-card-header system-doc">
+                        <h5><i class="fas fa-cog me-2"></i>{{ doc.title }}</h5>
+                    </div>
+                    <div class="doc-card-body">
+                        <p class="card-text">{{ doc.description }}</p>
+                        <div class="category-badge">{{ doc.category }}</div>
+                        <div class="mt-3">
+                            <a href="{{ doc.url }}" class="access-btn">
+                                <i class="fas fa-eye me-2"></i>View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Blockchain Reports Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2 class="section-title"><i class="fas fa-cube"></i>Blockchain Status Reports</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="doc-card">
+                    <div class="doc-card-header compliance-doc">
+                        <h5><i class="fas fa-chart-line me-2"></i>NVCT Blockchain Status Report</h5>
+                    </div>
+                    <div class="doc-card-body">
+                        <p class="card-text">Comprehensive real-time status report for NVCT token operations, network metrics, reserve backing, and development roadmap.</p>
+                        <div class="category-badge">Blockchain Operations</div>
+                        <div class="mt-3">
+                            <a href="/nvct-blockchain-report" class="access-btn w-100 text-center">
+                                <i class="fas fa-chart-bar me-2"></i>View Current Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access Section -->
+        <div class="quick-access">
+            <h2 class="section-title"><i class="fas fa-tachometer-alt"></i>Quick Access</h2>
+            <div class="row">
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-access-item">
+                        <i class="fas fa-university"></i>
+                        <div class="number">15</div>
+                        <div class="label">SWIFT Codes<br/>Global Operations</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-access-item">
+                        <i class="fas fa-globe"></i>
+                        <div class="number">4</div>
+                        <div class="label">Continents<br/>Regional Presence</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-access-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div class="number">$10T+</div>
+                        <div class="label">Assets<br/>Under Management</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-access-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div class="number">AAA</div>
+                        <div class="label">Rating<br/>Sovereign Authority</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/" class="return-btn">
+                <i class="fas fa-home me-2"></i>Return to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

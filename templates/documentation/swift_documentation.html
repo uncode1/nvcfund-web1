@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}NVC Fund Bank - SWIFT Documentation{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Document Header -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='nvc_fund_logo.png') }}" alt="NVC Fund Logo" style="height: 60px; background-color: white; padding: 10px; border-radius: 5px;" class="mb-3">
+                <h1 class="text-white mb-2">NVC FUND BANK</h1>
+                <h2 class="text-light mb-2">Global SWIFT Structure</h2>
+                <h3 class="text-info mb-3">Executive Documentation</h3>
+                
+                <!-- Download Options -->
+                <div class="mb-4">
+                    <a href="{{ url_for('static', filename='NVC_Fund_Bank_SWIFT_Documentation_Branded.pdf') }}" 
+                       class="btn btn-outline-info me-2" target="_blank">
+                        <i class="fas fa-download"></i> Download PDF Version
+                    </a>
+                    <span class="text-muted">|</span>
+                    <span class="text-light ms-2">Viewing HTML Version</span>
+                </div>
+            </div>
+
+            <!-- Institutional Authority -->
+            <div class="card bg-dark border-info mb-4">
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <div class="p-3" style="background-color: #061c38; border-radius: 5px;">
+                                <h5 class="text-white mb-0">SUPRANATIONAL SOVEREIGN INSTITUTION</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="p-3" style="background-color: #2c3e50; border-radius: 5px;">
+                                <h6 class="text-white mb-0">Under African Union Treaty Framework</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="p-3" style="background-color: #34495e; border-radius: 5px;">
+                                <h6 class="text-white mb-0">Global Banking Operations & Correspondent Services</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Metrics -->
+            <div class="card bg-dark border-light mb-4">
+                <div class="card-header" style="background-color: #061c38;">
+                    <h3 class="text-white mb-0">INSTITUTIONAL OVERVIEW</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-dark table-borderless">
+                                <tr>
+                                    <td><strong>Total Assets Under Management</strong></td>
+                                    <td>$10+ Trillion USD</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Market Capitalization</strong></td>
+                                    <td>$1+ Trillion USD</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Annual Revenue</strong></td>
+                                    <td>$289 Billion USD</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Global SWIFT Codes</strong></td>
+                                    <td>15 Strategic Locations</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-dark table-borderless">
+                                <tr>
+                                    <td><strong>ISO Standards Compliance</strong></td>
+                                    <td>20022 & 9362:2022 Certified</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Primary Operations Code</strong></td>
+                                    <td>NVCFGLXX (Global Authority)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Blockchain Integration</strong></td>
+                                    <td>NVCT Stablecoin Ready</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Issue Date</strong></td>
+                                    <td>{{ current_date }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Information -->
+            <div class="card bg-dark border-secondary mb-4">
+                <div class="card-header" style="background-color: #34495e;">
+                    <h4 class="text-white mb-0">DOCUMENT INFORMATION</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Version:</strong> 7.0 Branded Professional Edition</p>
+                            <p><strong>Classification:</strong> Executive Confidential</p>
+                            <p><strong>Distribution:</strong> Banking Regulators & Executive Partners</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Geographic Scope:</strong> Global Multi-Jurisdictional Operations</p>
+                            <p><strong>Issuing Authority:</strong> NVC Fund Bank Treaty Operations</p>
+                            <p><strong>Treaty Framework:</strong> African Union Banking Authority</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SWIFT Code Structure -->
+            <div class="card bg-dark border-light mb-4">
+                <div class="card-header" style="background-color: #061c38;">
+                    <h3 class="text-white mb-0">GLOBAL SWIFT CODE STRUCTURE</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-info mb-3">Primary Global Authority Code</h5>
+                            <div class="bg-secondary p-3 rounded mb-4">
+                                <h4 class="text-warning mb-2">NVCFGLXX</h4>
+                                <p class="text-light mb-1"><strong>Institution:</strong> NVC Fund Bank</p>
+                                <p class="text-light mb-1"><strong>Country:</strong> GL (Global/Supranational)</p>
+                                <p class="text-light mb-0"><strong>Purpose:</strong> Primary sovereign banking operations worldwide</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="text-info mb-3">Regional Operations Codes</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead class="table-info">
+                                <tr>
+                                    <th>SWIFT Code</th>
+                                    <th>Location</th>
+                                    <th>Region</th>
+                                    <th>Operations Focus</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>NVCFBKAU</strong></td>
+                                    <td>Australia</td>
+                                    <td>Asia-Pacific</td>
+                                    <td>Regional correspondent banking</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKUS</strong></td>
+                                    <td>United States</td>
+                                    <td>North America</td>
+                                    <td>USD operations, federal relations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKGB</strong></td>
+                                    <td>United Kingdom</td>
+                                    <td>Europe</td>
+                                    <td>European banking hub</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKDE</strong></td>
+                                    <td>Germany</td>
+                                    <td>Europe</td>
+                                    <td>EU regulatory compliance</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKCH</strong></td>
+                                    <td>Switzerland</td>
+                                    <td>Europe</td>
+                                    <td>Private banking, wealth management</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKSG</strong></td>
+                                    <td>Singapore</td>
+                                    <td>Asia-Pacific</td>
+                                    <td>Asian financial center</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKHK</strong></td>
+                                    <td>Hong Kong</td>
+                                    <td>Asia-Pacific</td>
+                                    <td>China market access</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKJP</strong></td>
+                                    <td>Japan</td>
+                                    <td>Asia-Pacific</td>
+                                    <td>Japanese market operations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKAE</strong></td>
+                                    <td>UAE</td>
+                                    <td>Middle East</td>
+                                    <td>Islamic banking, regional hub</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKBR</strong></td>
+                                    <td>Brazil</td>
+                                    <td>South America</td>
+                                    <td>Latin American operations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKZA</strong></td>
+                                    <td>South Africa</td>
+                                    <td>Africa</td>
+                                    <td>African Union treaty operations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKNG</strong></td>
+                                    <td>Nigeria</td>
+                                    <td>Africa</td>
+                                    <td>West African economic zone</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKKE</strong></td>
+                                    <td>Kenya</td>
+                                    <td>Africa</td>
+                                    <td>East African operations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKCA</strong></td>
+                                    <td>Canada</td>
+                                    <td>North America</td>
+                                    <td>Canadian market operations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NVCFBKIN</strong></td>
+                                    <td>India</td>
+                                    <td>Asia-Pacific</td>
+                                    <td>Indian subcontinent operations</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal Notice -->
+            <div class="card bg-dark border-warning mb-4">
+                <div class="card-body text-center">
+                    <h5 class="text-warning mb-3">CONFIDENTIAL & PROPRIETARY DOCUMENT</h5>
+                    <p class="text-light small mb-2">
+                        This document contains confidential and proprietary information of NVC Fund Bank, 
+                        a supranational sovereign institution operating under African Union Treaty authority. 
+                        Distribution is strictly restricted to authorized executive personnel, regulatory authorities, 
+                        and approved institutional partners only.
+                    </p>
+                    <p class="text-muted small mb-0">
+                        <em>© 2025 NVC Fund Bank - All Rights Reserved | African Union Treaty Framework</em>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

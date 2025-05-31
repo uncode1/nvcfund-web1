@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+
+{% block title %}SWIFT Message Routing - BIC Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-white mb-1">
+                        <i class="fas fa-route me-2"></i>
+                        SWIFT Message Routing
+                    </h2>
+                    <p class="text-light mb-0">Test SWIFT message routing capabilities using BIC codes</p>
+                </div>
+                <a href="{{ url_for('iso9362.bic_dashboard') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Routing Form -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card bg-dark border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                SWIFT Message Routing Test
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('iso9362.swift_routing') }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sender_bic" class="form-label text-light">Sender BIC</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="sender_bic" name="sender_bic" 
+                                               placeholder="e.g., NVCFGLXX" 
+                                               value="{{ request.form.get('sender_bic', '') }}" required>
+                                        <div class="form-text text-muted">Enter the sending institution's BIC code</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="receiver_bic" class="form-label text-light">Receiver BIC</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="receiver_bic" name="receiver_bic" 
+                                               placeholder="e.g., CHASUS33" 
+                                               value="{{ request.form.get('receiver_bic', '') }}" required>
+                                        <div class="form-text text-muted">Enter the receiving institution's BIC code</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="message_type" class="form-label text-light">Message Type</label>
+                                        <select class="form-select bg-dark text-light border-secondary" 
+                                                id="message_type" name="message_type" required>
+                                            <option value="">Select message type...</option>
+                                            <option value="MT103" {% if request.form.get('message_type') == 'MT103' %}selected{% endif %}>MT103 - Single Customer Credit Transfer</option>
+                                            <option value="MT202" {% if request.form.get('message_type') == 'MT202' %}selected{% endif %}>MT202 - General Financial Institution Transfer</option>
+                                            <option value="MT900" {% if request.form.get('message_type') == 'MT900' %}selected{% endif %}>MT900 - Confirmation of Debit</option>
+                                            <option value="MT910" {% if request.form.get('message_type') == 'MT910' %}selected{% endif %}>MT910 - Confirmation of Credit</option>
+                                            <option value="MT940" {% if request.form.get('message_type') == 'MT940' %}selected{% endif %}>MT940 - Customer Statement Message</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="priority" class="form-label text-light">Priority</label>
+                                        <select class="form-select bg-dark text-light border-secondary" 
+                                                id="priority" name="priority" required>
+                                            <option value="normal" {% if request.form.get('priority') == 'normal' %}selected{% endif %}>Normal</option>
+                                            <option value="urgent" {% if request.form.get('priority') == 'urgent' %}selected{% endif %}>Urgent</option>
+                                            <option value="system" {% if request.form.get('priority') == 'system' %}selected{% endif %}>System</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label text-light">Amount (Optional)</label>
+                                    <input type="number" class="form-control bg-dark text-light border-secondary" 
+                                           id="amount" name="amount" step="0.01" 
+                                           placeholder="e.g., 10000.00"
+                                           value="{{ request.form.get('amount', '') }}">
+                                    <div class="form-text text-muted">Transaction amount for applicable message types</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-route me-2"></i>
+                                    Test Routing
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick BIC Reference -->
+                <div class="col-lg-4">
+                    <div class="card bg-dark border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Quick BIC Reference
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong class="text-light">NVC Fund Bank:</strong>
+                                <div class="text-primary">NVCFGLXX</div>
+                            </div>
+                            <div class="mb-3">
+                                <strong class="text-light">JPMorgan Chase:</strong>
+                                <div class="text-primary">CHASUS33</div>
+                            </div>
+                            <div class="mb-3">
+                                <strong class="text-light">Deutsche Bank:</strong>
+                                <div class="text-primary">DEUTDEFF</div>
+                            </div>
+                            <div class="mb-3">
+                                <strong class="text-light">HSBC:</strong>
+                                <div class="text-primary">HBUKGB4B</div>
+                            </div>
+                            <div class="text-center">
+                                <a href="{{ url_for('iso9362.search_bics') }}" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-search me-1"></i>
+                                    View Full Registry
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routing Results -->
+            {% if result %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-dark border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Routing Test Results
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-light mb-3">Route Analysis</h6>
+                                    <table class="table table-dark table-striped">
+                                        <tr>
+                                            <td><strong>Route Status:</strong></td>
+                                            <td>
+                                                {% if result.status == 'route_available' %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Route Available
+                                                    </span>
+                                                {% elif result.status == 'route_unavailable' %}
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times me-1"></i>Route Unavailable
+                                                    </span>
+                                                {% elif result.status == 'validation_failed' %}
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation me-1"></i>Validation Failed
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-clock me-1"></i>{{ result.status|title }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status:</strong></td>
+                                            <td class="text-info">{{ result.status|title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Message Type:</strong></td>
+                                            <td class="text-primary">{{ result.message_type if result.message_type else 'Not specified' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Sender Valid:</strong></td>
+                                            <td class="{% if result.sender_valid %}text-success{% else %}text-danger{% endif %}">
+                                                {{ 'Yes' if result.sender_valid else 'No' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Receiver Valid:</strong></td>
+                                            <td class="{% if result.receiver_valid %}text-success{% else %}text-danger{% endif %}">
+                                                {{ 'Yes' if result.receiver_valid else 'No' }}
+                                            </td>
+                                        </tr>
+                                        {% if result.amount %}
+                                        <tr>
+                                            <td><strong>Amount:</strong></td>
+                                            <td class="text-success">${{ "%.2f"|format(result.amount) }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-light mb-3">Routing Details</h6>
+                                    <div class="bg-secondary rounded p-3">
+                                        {% if result.routing_path %}
+                                            <div class="mb-2">
+                                                <strong class="text-light">Routing Path:</strong>
+                                            </div>
+                                            {% for hop in result.routing_path %}
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="fas fa-arrow-right text-primary me-2"></i>
+                                                    <span class="text-light">{{ hop }}</span>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                        {% if result.estimated_time %}
+                                            <div class="mt-3 pt-3 border-top border-secondary">
+                                                <div class="text-light">
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    <strong>Estimated Processing Time:</strong> {{ result.estimated_time }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if result.fees %}
+                                            <div class="mt-2">
+                                                <div class="text-light">
+                                                    <i class="fas fa-dollar-sign me-2"></i>
+                                                    <strong>Estimated Fees:</strong> ${{ "%.2f"|format(result.fees) }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if result.notes %}
+                            <div class="mt-3">
+                                <h6 class="text-light">Additional Notes:</h6>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    {{ result.notes }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

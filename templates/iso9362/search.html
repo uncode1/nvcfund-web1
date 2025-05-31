@@ -1,0 +1,352 @@
+{% extends "layout.html" %}
+
+{% block title %}BIC Registry Search - BIC Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-white mb-1">
+                        <i class="fas fa-search me-2"></i>
+                        BIC Registry Search
+                    </h2>
+                    <p class="text-light mb-0">Search and browse SWIFT Business Identifier Codes</p>
+                </div>
+                <a href="{{ url_for('iso9362.bic_dashboard') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Search Form -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card bg-dark border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-filter me-2"></i>
+                                Search BIC Registry
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" action="{{ url_for('iso9362.search_bics') }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="country" class="form-label text-light">Country Code</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="country" name="country" 
+                                               placeholder="e.g., GL, US, DE, GB" 
+                                               value="{{ country_code }}" maxlength="2">
+                                        <div class="form-text text-muted">Enter 2-letter ISO country code</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="institution" class="form-label text-light">Institution Name</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="institution" name="institution" 
+                                               placeholder="e.g., JPMorgan, Deutsche Bank" 
+                                               value="{{ request.args.get('institution', '') }}">
+                                        <div class="form-text text-muted">Search by institution name</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="bic_code" class="form-label text-light">BIC Code</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="bic_code" name="bic_code" 
+                                               placeholder="e.g., NVCFGLXX" 
+                                               value="{{ request.args.get('bic_code', '') }}" maxlength="11">
+                                        <div class="form-text text-muted">Enter complete or partial BIC code</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="city" class="form-label text-light">City</label>
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               id="city" name="city" 
+                                               placeholder="e.g., New York, London" 
+                                               value="{{ request.args.get('city', '') }}">
+                                        <div class="form-text text-muted">Search by city location</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-2"></i>
+                                        Search Registry
+                                    </button>
+                                    <a href="{{ url_for('iso9362.search_bics') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        Clear
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="card bg-dark border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-bolt me-2"></i>
+                                Quick Actions
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('iso9362.validate_bic') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Validate BIC Code
+                                </a>
+                                <a href="{{ url_for('iso9362.swift_routing') }}" class="btn btn-outline-warning">
+                                    <i class="fas fa-route me-2"></i>
+                                    Test Message Routing
+                                </a>
+                                <a href="{{ url_for('iso9362.correspondent_banks') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-building me-2"></i>
+                                    Correspondent Banks
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registry Statistics -->
+                    <div class="card bg-dark border-secondary mt-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Registry Statistics
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="text-primary h4">5</div>
+                                    <div class="text-muted small">Total BICs</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-success h4">4</div>
+                                    <div class="text-muted small">Countries</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            {% if results or country_code %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-dark border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Search Results
+                                {% if country_code %}
+                                    - Country: {{ country_code }}
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if results %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>BIC Code</th>
+                                                <th>Institution Name</th>
+                                                <th>Country</th>
+                                                <th>City</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for bic in results %}
+                                            <tr>
+                                                <td>
+                                                    <code class="text-primary">{{ bic.bic_code }}</code>
+                                                </td>
+                                                <td>{{ bic.institution_name }}</td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ bic.country_code }}</span>
+                                                </td>
+                                                <td>{{ bic.city or 'N/A' }}</td>
+                                                <td>
+                                                    <span class="badge bg-secondary">
+                                                        {{ bic.bic_type.value if bic.bic_type else 'Standard' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if bic.status and bic.status.value == 'active' %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Unknown</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{ url_for('iso9362.lookup', bic_code=bic.bic_code) }}" 
+                                                           class="btn btn-outline-primary" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="{{ url_for('iso9362.validate_bic') }}?bic={{ bic.bic_code }}" 
+                                                           class="btn btn-outline-success" title="Validate">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-search text-muted" style="font-size: 3rem;"></i>
+                                    <h5 class="text-light mt-3">No results found</h5>
+                                    <p class="text-muted">
+                                        {% if country_code %}
+                                            No BIC codes found for country "{{ country_code }}". 
+                                        {% else %}
+                                            Try adjusting your search criteria or browse all available BIC codes.
+                                        {% endif %}
+                                    </p>
+                                    <a href="{{ url_for('iso9362.search_bics') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-search me-1"></i>
+                                        New Search
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Default Registry Display -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-dark border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-database me-2"></i>
+                                Available BIC Codes
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>BIC Code</th>
+                                            <th>Institution Name</th>
+                                            <th>Country</th>
+                                            <th>Type</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="text-primary">NVCFGLXX</code></td>
+                                            <td>NVC Fund Bank</td>
+                                            <td><span class="badge bg-info">GL</span></td>
+                                            <td><span class="badge bg-secondary">Institution</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('iso9362.lookup', bic_code='NVCFGLXX') }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('iso9362.validate_bic') }}?bic=NVCFGLXX" 
+                                                       class="btn btn-outline-success" title="Validate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="text-primary">CHASUS33</code></td>
+                                            <td>JPMorgan Chase Bank</td>
+                                            <td><span class="badge bg-info">US</span></td>
+                                            <td><span class="badge bg-secondary">Correspondent</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('iso9362.lookup', bic_code='CHASUS33') }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('iso9362.validate_bic') }}?bic=CHASUS33" 
+                                                       class="btn btn-outline-success" title="Validate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="text-primary">DEUTDEFF</code></td>
+                                            <td>Deutsche Bank AG</td>
+                                            <td><span class="badge bg-info">DE</span></td>
+                                            <td><span class="badge bg-secondary">Correspondent</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('iso9362.lookup', bic_code='DEUTDEFF') }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('iso9362.validate_bic') }}?bic=DEUTDEFF" 
+                                                       class="btn btn-outline-success" title="Validate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="text-primary">HBUKGB4B</code></td>
+                                            <td>HSBC Bank plc</td>
+                                            <td><span class="badge bg-info">GB</span></td>
+                                            <td><span class="badge bg-secondary">Correspondent</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('iso9362.lookup', bic_code='HBUKGB4B') }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('iso9362.validate_bic') }}?bic=HBUKGB4B" 
+                                                       class="btn btn-outline-success" title="Validate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="text-primary">CITIUS33</code></td>
+                                            <td>Citibank N.A.</td>
+                                            <td><span class="badge bg-info">US</span></td>
+                                            <td><span class="badge bg-secondary">Correspondent</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('iso9362.lookup', bic_code='CITIUS33') }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('iso9362.validate_bic') }}?bic=CITIUS33" 
+                                                       class="btn btn-outline-success" title="Validate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
