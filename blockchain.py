@@ -132,8 +132,8 @@ def get_gas_price(network='sepolia'):
         return gas_price_gwei
     except Exception as e:
         logger.error(f"Error getting gas price: {e}")
-        return None
-        
+        return None        
+
 def connect_to_ethereum(network='sepolia'):
     """
     Connect to Ethereum network (mainnet or testnet)
@@ -166,10 +166,12 @@ def connect_to_ethereum(network='sepolia'):
             if network.lower() != 'mainnet':
                 try:
                     from web3.middleware import geth_poa_middleware
-                    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+                    w3.middleware_onion.inject(geth_poa_middleware, name='poa')
+                except ImportError:
+                    logger.warning("geth_poa_middleware not available")
                 except Exception as e:
-                    logger.warning(f"Error injecting PoA middleware: {e}")
-            
+                    logger.error(f"Failed to inject POA middleware: {str(e)}")
+
             # Get the network ID/version to confirm connection
             network_version = w3.net.version
             logger.info(f"Successfully connected to Ethereum node. Network version: {network_version}")
