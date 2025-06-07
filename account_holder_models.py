@@ -6,7 +6,7 @@ and bank accounts.
 
 import enum
 from datetime import datetime
-from app import db
+from models import db
 from sqlalchemy.ext.hybrid import hybrid_property
 
 class ExchangeType(enum.Enum):

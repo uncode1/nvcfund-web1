@@ -1,11 +1,13 @@
-import json
 import os
 import logging
 import time
 import boto3
+import json
 from botocore.exceptions import ClientError
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, redirect, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect
@@ -25,6 +27,8 @@ except ImportError:
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+class Base(DeclarativeBase):
+    pass
 
 
 # Create extension instances
@@ -54,10 +58,9 @@ def create_app():
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
 
     # Configure the database with optimized settings
-
     # Function to retrieve RDS credentials from Secrets Manager
     def get_db_credentials(secret_name='nvcfund/db-credentials', region_name='us-east-2'):
-        import json  # Import json within the function scope
+        import json #import json within function scope
         # Create a Secrets Manager client
         session = boto3.session.Session()
         client = session.client(service_name='secretsmanager', region_name=region_name)
@@ -75,9 +78,7 @@ def create_app():
 
         return secret_dict
 
-    
-
-    # Try to fetch database credentials from AWS Secrets Manager first
+    # Fetch database credentials from Secrets Manager
     try:
         db_credentials = get_db_credentials()
         db_user = db_credentials['username']
@@ -86,29 +87,12 @@ def create_app():
         db_port = db_credentials['port']
         db_name = db_credentials['dbname']
 
+        # Construct the database URI
         app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
-        logger.info(f"Successfully set database URI using AWS Secrets Manager: postgresql://{db_user}:[REDACTED]@{db_host}:{db_port}/{db_name}")
+        logger.info(f"Successfully set database URI using Secrets Manager: postgresql://{db_user}:[REDACTED]@{db_host}:{db_port}/{db_name}")
     except Exception as e:
-        logger.warning(f"Failed to access AWS Secrets Manager: {str(e)}")
-        logger.info("Falling back to environment variables...")
-
-        # Fallback to environment variables - no hardcoded defaults
-        db_user = os.environ.get("DB_USER")
-        db_pass = os.environ.get("DB_PASSWORD") 
-        db_host = os.environ.get("DB_HOST")
-        db_port = os.environ.get("DB_PORT", "5432")
-        db_name = os.environ.get("DB_NAME")
-
-        # Check that required environment variables are present
-        if not all([db_user, db_pass, db_host, db_name]):
-            missing_vars = [var for var, val in [("DB_USER", db_user), ("DB_PASSWORD", db_pass), ("DB_HOST", db_host), ("DB_NAME", db_name)] if not val]
-            logger.error(f"Missing required environment variables: {missing_vars}")
-            logger.error("Please set these in Replit Secrets or environment variables")
-            raise Exception(f"Database configuration incomplete - missing: {', '.join(missing_vars)}")
-
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
-        logger.info(f"Using environment variables: postgresql://{db_user}:[REDACTED]@{db_host}:{db_port}/{db_name}")
-        logger.info("Application running with environment variable configuration")
+        logger.error(f"Failed to configure database URI: {str(e)}")
+        raise e
 
     # Configure SQLAlchemy with optimized settings for t2.micro
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -129,9 +113,10 @@ def create_app():
         }
     }
 
+    
     # Disable SQLAlchemy modification tracking for better performance
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    
     # Add JSON filter for templates
     @app.template_filter('from_json')
     def from_json(value):
@@ -140,7 +125,7 @@ def create_app():
             return json.loads(value)
         except (ValueError, TypeError):
             return {}
-
+            
     # Add format_number filter for formatting large numbers with commas
     @app.template_filter('format_number')
     def format_number(value):
@@ -149,7 +134,7 @@ def create_app():
             return "{:,}".format(int(value))
         except (ValueError, TypeError):
             return value
-
+            
     # Add datetime filter for formatting timestamps
     @app.template_filter('datetime')
     def format_datetime(value):
@@ -160,7 +145,7 @@ def create_app():
             return value.strftime("%Y-%m-%d %H:%M:%S")
         except (ValueError, TypeError, AttributeError):
             return str(value)
-
+            
     # Add format_currency filter for formatting currency values
     @app.template_filter('format_currency')
     def format_currency(value):
@@ -171,7 +156,7 @@ def create_app():
             return "{:.2f}".format(float(value))
         except (ValueError, TypeError):
             return str(value)
-
+    
     # Allow embedding in iframes for Replit
     @app.after_request
     def set_security_headers(response):
@@ -180,7 +165,7 @@ def create_app():
         # For modern browsers that don't support ALLOW-FROM
         response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://replit.com https://*.replit.com;"
         return response
-
+    
     # Configure session 
     app.config["SESSION_COOKIE_SECURE"] = False  # Allow non-HTTPS for development
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -189,7 +174,7 @@ def create_app():
     app.config["SESSION_TYPE"] = "filesystem"
     # Make sessions permanent by default
     app.config["SESSION_PERMANENT"] = True
-
+    
     # Configure Flask-Login
     app.config["REMEMBER_COOKIE_DURATION"] = 86400  # 24 hours
     app.config["REMEMBER_COOKIE_SECURE"] = False  # Allow non-HTTPS for development
@@ -203,10 +188,8 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hour
 
     # Initialize extensions with app
-    # Import and initialize database
-    from models import db
     db.init_app(app)
-
+    
     # Add database connection retry mechanism
     try:
         from db_retry import setup_db_retry_handlers
@@ -214,16 +197,16 @@ def create_app():
         logger.info("Database retry mechanism initialized")
     except Exception as e:
         logger.error(f"Failed to initialize database retry mechanism: {str(e)}")
-
+    
     # Disable CSRF protection completely for API testing
     app.config['WTF_CSRF_ENABLED'] = False
-
+    
     # Initialize extensions
     csrf.init_app(app)
     jwt.init_app(app)
     login_manager.init_app(app)
     # login_view is already set in the global login_manager configuration
-
+    
     # Direct root-level routes for registration
     @app.route('/signup')
     @app.route('/join')
@@ -232,13 +215,13 @@ def create_app():
     def direct_register():
         """Direct shortcut to the registration form"""
         return redirect('/main/register')
-
+    
     # Add custom filters
     import json
     from filters import format_currency, format_transaction_type
     from markupsafe import Markup
     app.jinja_env.filters['format_currency'] = lambda amount, currency='USD': format_currency(amount, currency)
-
+    
     # Add nl2br filter for newlines to <br> conversion
     @app.template_filter('nl2br')
     def nl2br_filter(text):
@@ -246,7 +229,7 @@ def create_app():
         if text is None:
             return ""
         return Markup(text.replace('\n', '<br>'))
-
+    
     # Register number formatting filter
     @app.template_filter('format_number')
     def format_number_filter(value):
@@ -260,12 +243,12 @@ def create_app():
                 return "{:,.2f}".format(float(value))
             except (ValueError, TypeError):
                 return str(value)
-
+    
     # Register format_transaction_type as a template filter
     @app.template_filter('format_transaction_type')
     def format_transaction_type_filter(transaction_type):
         return format_transaction_type(transaction_type)
-
+        
     # Add JSON parsing filter for transaction metadata
     @app.template_filter('from_json')
     def from_json_filter(value):
@@ -279,14 +262,14 @@ def create_app():
 
     # Set debug mode to True
     app.config['DEBUG'] = True
-
+    
     # Global error handlers
     @app.errorhandler(Exception)
     def handle_exception(e):
         """Global exception handler to log errors"""
         app.logger.error(f"Unhandled exception: {str(e)}", exc_info=True)
         return render_template('error.html', error=str(e)), 500
-
+        
     @app.errorhandler(404)
     def page_not_found(e):
         """Custom 404 error handler"""
@@ -297,7 +280,7 @@ def create_app():
             code=404, 
             title="Page Not Found"
         ), 404
-
+    
     # Add direct routes to handle common paths
     @app.route('/')
     def root():
@@ -308,7 +291,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error rendering index: {str(e)}")
             return f"Error: {str(e)}", 500
-
+    
     # Add direct access to funds transfer guide
     @app.route('/funds-transfer-guide')
     def funds_transfer_guide_direct():
@@ -319,7 +302,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error redirecting to funds transfer guide: {str(e)}")
             return f"Error: {str(e)}", 500
-
+    
     @app.route('/main')
     def main_index():
         """Main index route"""
@@ -328,7 +311,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error rendering main index: {str(e)}")
             return f"Error: {str(e)}", 500
-
+            
     @app.route('/main/index')
     def main_explicit_index():
         """Explicit main index route"""
@@ -353,7 +336,7 @@ def create_app():
     with app.app_context():
         # Import models to ensure tables are created
         import models  # noqa: F401
-
+        
         # Import account holder models
         try:
             import account_holder_models  # noqa: F401
@@ -361,7 +344,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing account holder models: {str(e)}")
             logger.warning("Application will run without account holder functionality")
-
+            
         # Import trust portfolio models
         try:
             import trust_portfolio  # noqa: F401
@@ -369,7 +352,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing trust portfolio models: {str(e)}")
             logger.warning("Application will run without trust portfolio functionality")
-
+            
         # Import payment models
         try:
             import payment_models  # noqa: F401
@@ -377,7 +360,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing payment models: {str(e)}")
             logger.warning("Application will run without payment settlement functionality")
-
+            
         # Import loan models
         try:
             import self_liquidating_loan as loan_system  # noqa: F401
@@ -385,7 +368,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing loan models: {str(e)}")
             logger.warning("Application will run without loan functionality")
-
+            
         # Import financial institution recapitalization models
         try:
             from models import FinancialInstitution  # noqa: F401
@@ -393,10 +376,10 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing financial institution recapitalization models: {str(e)}")
             logger.warning("Application will run without financial institution recapitalization functionality")
-
+        
         # Create database tables
         db.create_all()
-
+        
         # Initialize blockchain connection (make it optional to allow app to start without blockchain)
         try:
             from blockchain import init_web3
@@ -405,10 +388,10 @@ def create_app():
         except Exception as e:
             logger.error(f"Error initializing blockchain: {str(e)}")
             logger.warning("Application will run without blockchain functionality")
-
+        
         # High-availability infrastructure has been removed as requested
         logger.info("High-availability infrastructure is disabled")
-
+        
         # Initialize payment gateways
         try:
             from payment_gateways import init_payment_gateways
@@ -419,16 +402,16 @@ def create_app():
         except Exception as e:
             logger.error(f"Error initializing payment gateways: {str(e)}")
             logger.warning("Application will run without payment gateway functionality")
-
+        
         # Import routes module to register Flask route decorators
         import routes
-
+        
         # Import and register blueprints
         from routes import api_blueprint, web_blueprint, api_access_bp
         app.register_blueprint(api_blueprint)
         app.register_blueprint(web_blueprint)
         app.register_blueprint(api_access_bp)
-
+        
         # Register Circle partnership blueprint
         try:
             from routes.circle_simple import circle_bp
@@ -437,7 +420,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Circle partnership routes: {str(e)}")
             logger.warning("Application will run without Circle partnership functionality")
-
+        
         # Register ISO 9362:2022 BIC Management blueprint
         try:
             from routes.iso9362_routes import iso9362_bp
@@ -445,7 +428,7 @@ def create_app():
             logger.info("ISO 9362:2022 BIC Management routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering ISO 9362:2022 routes: {str(e)}")
-
+            
         # Register SWIFT Documentation blueprint
         try:
             from routes.swift_documentation_routes import swift_docs_bp
@@ -455,23 +438,23 @@ def create_app():
             logger.error(f"Error registering SWIFT Documentation routes: {str(e)}")
             logger.warning("Application will run without SWIFT Documentation functionality")
             logger.warning("Application will run without BIC Management functionality")
-
+        
         # Add direct routes for recapitalization program
         @app.route('/recapitalization')
         def recapitalization():
             """Financial Institution Recapitalization Program information page"""
             return render_template('recapitalization.html')
-
+            
         @app.route('/recapitalization/dashboard')
         def recapitalization_dashboard():
             """Financial Institution Recapitalization Dashboard"""
             return render_template('recapitalization_dashboard.html')
-
+            
         @app.route('/recapitalization/new')
         def new_capital_injection():
             """New Capital Injection Form"""
             return render_template('new_capital_injection.html')
-
+            
         @app.route('/recapitalization/process', methods=['POST'])
         def process_capital_injection():
             """Process Capital Injection Form"""
@@ -480,30 +463,37 @@ def create_app():
             flash('Capital injection application has been submitted successfully!', 'success')
             return redirect(url_for('recapitalization_dashboard'))
 
+        # Liquidity Infrastructure Access
+        @app.route('/liquidity')
+        def liquidity_dashboard():
+            """NVCT Liquidity Infrastructure Dashboard"""
+            return render_template('liquidity/dashboard.html')
+            
+        @app.route('/liquidity/engine')
+        def liquidity_engine():
+            """NVCT Liquidity Engine Control Panel"""
+            return render_template('liquidity/engine.html')
+            
+        @app.route('/liquidity/cbdc')
+        def cbdc_dashboard():
+            """Central Bank Digital Currency Operations"""
+            return render_template('liquidity/cbdc.html')
+        
         # Register Documentation routes
         from routes.documentation_routes import documentation_bp
         app.register_blueprint(documentation_bp, url_prefix='/documentation')
-
+        
         # Register Admin routes
         from routes.admin import admin
         app.register_blueprint(admin)
-
+        
         # Register Transaction Admin routes
         try:
             from routes.admin_routes import admin_bp
             app.register_blueprint(admin_bp)
         except Exception as e:
             logger.error(f"Error registering admin routes: {str(e)}")
-
-        # Register SBLC routes
-        try:
-            from routes.sblc_routes import sblc_bp
-            app.register_blueprint(sblc_bp)
-            logger.info("SBLC routes registered successfully")
-        except Exception as e:
-            logger.error(f"Error registering SBLC routes: {str(e)}")
-            logger.warning("Application will run without SBLC functionality")
-
+            
         # Import SBLC models
         try:
             import sblc_models  # noqa: F401
@@ -511,7 +501,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error importing SBLC models: {str(e)}")
             logger.warning("Application will run without SBLC functionality")
-
+            
         # Register Account Management routes
         try:
             from routes.account_management_routes import account_bp
@@ -519,7 +509,7 @@ def create_app():
             logger.info("Account management routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering account management routes: {str(e)}")
-
+            
         # Register Banking Account routes
         try:
             from routes.account_routes import account_bp as banking_account_bp
@@ -527,7 +517,7 @@ def create_app():
             logger.info("Banking account routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering banking account routes: {str(e)}")
-
+            
         # Register Direct Account Generation routes
         try:
             from routes.direct_account_routes import direct_bp
@@ -535,7 +525,7 @@ def create_app():
             logger.info("Direct account generation routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering direct account generation routes: {str(e)}")
-
+            
         # Register Dashboard routes
         try:
             from routes.dashboard_routes import dashboard_bp
@@ -543,7 +533,7 @@ def create_app():
             logger.info("Dashboard routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering dashboard routes: {str(e)}")
-
+            
             # Register NVC Platform integration admin routes
             from routes.nvc_platform_admin_routes import nvc_platform_admin_bp
             app.register_blueprint(nvc_platform_admin_bp)
@@ -551,7 +541,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Transaction Admin routes: {str(e)}")
             logger.warning("Application will run without Transaction Admin functionality")
-
+            
         # Register Blockchain Admin routes
         try:
             from routes.blockchain_admin_routes import blockchain_admin_bp
@@ -560,15 +550,15 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Blockchain Admin routes: {str(e)}")
             logger.warning("Application will run without Blockchain Admin functionality")
-
+        
         # Register EDI Integration routes
         from routes.edi_routes import edi
         app.register_blueprint(edi)
-
+        
         # Register Treasury Management System routes
         from routes.treasury_routes import treasury_bp
         app.register_blueprint(treasury_bp)
-
+        
         # Register Treasury Settlement routes
         try:
             from routes.treasury_settlement_routes import treasury_settlement_bp
@@ -577,11 +567,11 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Treasury Settlement routes: {str(e)}")
             logger.warning("Application will run without Treasury Settlement functionality")
-
+        
         # Register Document routes
         from routes.document_routes import docs_bp
         app.register_blueprint(docs_bp)
-
+        
         # Register Loan routes
         try:
             # Register the simplified loan routes to avoid ORM model issues
@@ -591,15 +581,16 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Simplified loan routes: {str(e)}")
             logger.warning("Application will run without Simplified loan functionality")
-
+        
         # Register SWIFT GPI routes
         try:
             from routes.swift_gpi_routes import swift_gpi_routes
             app.register_blueprint(swift_gpi_routes)
             logger.info("SWIFT GPI routes registered successfully")
+        except ImportError:
+            logger.warning("SWIFT GPI routes module not found")
         except Exception as e:
             logger.error(f"Error registering SWIFT GPI routes: {str(e)}")
-            logger.warning("Application will run without SWIFT GPI functionality")
 
         # Register Simplified Exchange routes
         try:
@@ -609,7 +600,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Simplified Exchange routes: {str(e)}")
             logger.warning("Application will run without Simplified Exchange functionality")
-
+        
         # Register Server-to-Server routes
         try:
             from routes.server_to_server_routes import server_to_server_routes
@@ -618,7 +609,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Server-to-Server routes: {str(e)}")
             logger.warning("Application will run without Server-to-Server functionality")
-
+        
         # Register RTGS routes
         try:
             from routes.rtgs_routes import rtgs_routes
@@ -627,7 +618,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering RTGS routes: {str(e)}")
             logger.warning("Application will run without RTGS functionality")
-
+        
         # Register SBLC routes directly
         try:
             from routes.sblc_routes import sblc_bp
@@ -636,7 +627,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering SBLC routes: {str(e)}")
             logger.warning("Application will run without SBLC functionality")
-
+        
         # Register Circle Partnership routes
         try:
             from routes.circle_partnership_routes import circle_bp
@@ -645,11 +636,11 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Circle Partnership routes: {str(e)}")
             logger.warning("Application will run without Circle Partnership functionality")
-
+        
         # Register API routes
         from routes.api import api_bp as main_api_bp
         app.register_blueprint(main_api_bp)
-
+        
         # Register NVC Platform integration API routes
         try:
             from nvc_platform_integration import nvc_platform_bp
@@ -657,7 +648,7 @@ def create_app():
             logger.info("NVC Platform integration API routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering NVC Platform integration routes: {str(e)}")
-
+        
         # Register Mojoloop API integration routes
         try:
             from mojoloop_integration import mojoloop_bp, mojoloop_web_bp
@@ -667,7 +658,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Mojoloop API integration routes: {str(e)}")
             logger.warning("Application will run without Mojoloop real-time payment capabilities")
-
+        
         # Register Flutterwave Payment Gateway routes
         try:
             from routes.flutterwave_routes import flutterwave_bp, flutterwave_web_bp
@@ -677,7 +668,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Flutterwave payment gateway routes: {str(e)}")
             logger.warning("Application will run without Flutterwave payment capabilities")
-
+        
         # Register Payment Options routes
         try:
             from routes.payment_routes import payment_bp
@@ -686,7 +677,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering payment options routes: {str(e)}")
             logger.warning("Application will run without payment options functionality")
-
+        
         # Initialize EDI Service
         try:
             from edi_integration import init_app as init_edi
@@ -695,10 +686,10 @@ def create_app():
         except Exception as e:
             logger.error(f"Error initializing EDI Integration: {str(e)}")
             logger.warning("Application will run without EDI functionality")
-
+        
         # Admin API Keys routes are registered through the admin blueprint
         # No need to register them separately
-
+        
         # Register Customer Support routes
         try:
             from routes.customer_support_routes import customer_support_bp
@@ -707,7 +698,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Customer Support routes: {str(e)}")
             logger.warning("Application will run without AI Customer Support functionality")
-
+            
         # Register Investment Offering routes
         try:
             from routes.investment_routes import investment_bp
@@ -716,7 +707,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Investment Offering routes: {str(e)}")
             logger.warning("Application will run without Investment Offering functionality")
-
+            
         # Register ISO 20022 Financial Messaging routes
         try:
             from routes.iso20022_routes import register_iso20022_routes
@@ -725,7 +716,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering ISO 20022 routes: {str(e)}")
             logger.warning("Application will run without ISO 20022 functionality")
-
+            
         # Register Admin Tools routes
         try:
             from routes.admin_tools_routes import admin_tools_bp
@@ -734,7 +725,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Admin Tools routes: {str(e)}")
             logger.warning("Application will run without Admin Tools functionality")
-
+            
         # Register Payment Processor routes
         try:
             from routes.payment_processor_routes import register_payment_processor_routes
@@ -743,45 +734,39 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Payment Processor routes: {str(e)}")
             logger.warning("Application will run without Payment Processor functionality")
-
-        # Register PayPal routes
-        try:
-            from routes.paypal_routes import register_paypal_blueprint
-            register_paypal_blueprint(app)
-            logger.info("PayPal routes registered successfully")
-
-            # Ensure PayPal gateway exists
+            
+        # Ensure PayPal gateway exists
+        def setup_paypal_gateway():
             try:
                 from models import PaymentGateway, PaymentGatewayType
                 paypal_gateway = PaymentGateway.query.filter_by(
                     gateway_type=PaymentGatewayType.PAYPAL, 
                     is_active=True
                 ).first()
-
-                if notpaypal_gateway:
-                    # Create a new PayPal gateway if it doesn't exist
+                
+                if not paypal_gateway:
                     paypal_gateway = PaymentGateway(
                         name="PayPal",
                         gateway_type=PaymentGatewayType.PAYPAL,
                         api_endpoint="https://api.paypal.com",
                         is_active=True,
-                        is_test_mode=False,  # Production mode
+                        is_test_mode=False,
                         description="PayPal payment gateway (Live mode)"
                     )
-                else:
-                    # Update existing gateway to live mode
-                    paypal_gateway.is_test_mode = False
-                    paypal_gateway.description = "PayPal payment gateway (Live mode)"
-                    logger.info("Updated PayPal gateway to live mode")
                     db.session.add(paypal_gateway)
                     db.session.commit()
-                    logger.info("Created new PayPal payment gateway")
+                return True
             except Exception as e:
-                logger.warning(f"Error setting up PayPal gateway: {str(e)}")
-
+                logger.error(f"PayPal gateway setup failed: {str(e)}")
+                return False
+        # Register PayPal routes
+        try:
+            from routes.paypal_routes import register_paypal_blueprint
+            register_paypal_blueprint(app)
+            if not setup_paypal_gateway():
+                logger.warning("PayPal gateway setup failed")
         except Exception as e:
-            logger.error(f"Error registering PayPal routes: {str(e)}")
-            logger.warning("Application will run without PayPal functionality")
+            logger.error(f"Error registering PayPal routes: {str(e)}")            
 
         # Register KTT Telex routes
         try:
@@ -791,7 +776,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering KTT Telex routes: {str(e)}")
             logger.warning("Application will run without KTT Telex functionality")
-
+            
         # Register PDF routes
         try:
             from routes.pdf_routes import register_pdf_routes
@@ -800,7 +785,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering PDF routes: {str(e)}")
             logger.warning("Application will run without PDF generation functionality")
-
+            
         # Register PDF Reports routes
         try:
             from routes.pdf_reports import register_pdf_reports_routes
@@ -818,7 +803,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering NVC Token Stablecoin routes: {str(e)}")
             logger.warning("Application will run without Stablecoin functionality")
-
+            
         # Register Saint Crown Integration routes
         try:
             from routes.saint_crown_routes import saint_crown_bp
@@ -827,7 +812,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Saint Crown Integration routes: {str(e)}")
             logger.warning("Application will run without Saint Crown Integration functionality")
-
+            
         # Register Account Holder routes
         try:
             from routes.account_holder_routes import register_account_holder_routes
@@ -836,20 +821,20 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Account Holder routes: {str(e)}")
             logger.warning("Application will run without Account Holder functionality")
-
+            
         # Register Currency Exchange routes
         try:
             from routes.currency_exchange_routes import register_currency_exchange_routes
             register_currency_exchange_routes(app)
             logger.info("Currency Exchange routes registered successfully")
-
+            
             # Register POS Payment routes
             try:
                 from routes.pos_routes import pos_bp, register_routes
                 app.register_blueprint(pos_bp)
                 register_routes(app)
                 logger.info("POS Payment routes registered successfully")
-
+                
                 # Register Stripe routes since we have the POS routes
                 try:
                     from routes.stripe_routes import register_stripe_routes
@@ -866,7 +851,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Currency Exchange routes: {str(e)}")
             logger.warning("Application will run without Currency Exchange functionality")
-
+            
         # Register Trust Portfolio routes
         try:
             from routes.trust_routes import trust_bp
@@ -875,7 +860,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Trust Portfolio routes: {str(e)}")
             logger.warning("Application will run without Trust Portfolio functionality")
-
+            
         # Register API Documentation routes
         try:
             from routes.api_documentation_routes import api_docs_bp
@@ -884,7 +869,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering API Documentation routes: {str(e)}")
             logger.warning("Application will run without API Documentation functionality")
-
+            
         # Register Correspondent Banking routes
         try:
             from routes.correspondent_banking_routes import correspondent_bp
@@ -893,7 +878,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Correspondent Banking routes: {str(e)}")
             logger.warning("Application will run without Correspondent Banking functionality")
-
+        
         # Register Wire Transfer routes
         try:
             from routes.wire_transfer_routes import wire_transfer_bp
@@ -902,7 +887,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Wire Transfer routes: {str(e)}")
             logger.warning("Application will run without Wire Transfer functionality")
-
+        
         # Register Document Download Center routes
         try:
             from routes.document_download_routes import document_download_bp
@@ -911,7 +896,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Document Download Center routes: {str(e)}")
             logger.warning("Application will run without Document Download Center functionality")
-
+            
         # Register Standby Letter of Credit (SBLC) routes
         try:
             from routes.sblc_routes import sblc_bp
@@ -920,7 +905,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering SBLC routes: {str(e)}")
             logger.warning("Application will run without SBLC functionality")
-
+            
         # Register Client Dashboard routes
         try:
             from routes.client_dashboard_routes import register_client_dashboard_routes
@@ -929,7 +914,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Client Dashboard routes: {str(e)}")
             logger.warning("Application will run without Client Dashboard functionality")
-
+            
         # Register Public Download routes
         try:
             from routes.public_downloads import public_downloads_bp
@@ -938,7 +923,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Public Download routes: {str(e)}")
             logger.warning("Application will run without Public Download functionality")
-
+            
         # Register Direct Static File routes
         try:
             from static_routes import register_static_routes
@@ -947,7 +932,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Direct Static File routes: {str(e)}")
             logger.warning("Application will run without Direct Static File functionality")
-
+            
         # Register Stripe NVCT Payment routes
         try:
             from routes.stripe_nvct_routes import stripe_bp as stripe_nvct_bp
@@ -956,7 +941,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Stripe NVCT payment routes: {str(e)}")
             logger.warning("Application will run without Stripe NVCT payment functionality")
-
+        
         # Register Institutional Agreements routes
         try:
             from routes.agreements_routes import agreements_bp
@@ -965,7 +950,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Institutional Agreements routes: {str(e)}")
             logger.warning("Application will run without Institutional Agreements functionality")
-
+            
         # Register Bridge.xyz Partnership routes
         try:
             from routes.bridge_xyz_routes import bridge_xyz_bp
@@ -974,7 +959,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Bridge.xyz Partnership routes: {str(e)}")
             logger.warning("Application will run without Bridge.xyz Partnership functionality")
-
+        
         # Create PHP test integration user
         try:
             from auth import create_php_test_user
@@ -985,7 +970,7 @@ def create_app():
                 logger.warning("Failed to create PHP test integration user")
         except Exception as e:
             logger.error(f"Error creating PHP test user: {str(e)}")
-
+        
         # Register Healthcheck routes
         try:
             from routes.healthcheck_routes import register_healthcheck_routes
@@ -993,7 +978,7 @@ def create_app():
             logger.info("Healthcheck routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering Healthcheck routes: {str(e)}")
-
+            
         # Register Payment routes for all account types
         try:
             from routes.payment_routes import payment_bp
@@ -1002,7 +987,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Payment routes: {str(e)}")
             logger.warning("Application will run without Payment functionality")
-
+            
         # Register Static routes for special files (favicon, robots.txt)
         try:
             from routes.static_routes import register_static_routes
@@ -1010,7 +995,7 @@ def create_app():
             logger.info("Static routes registered successfully")
         except Exception as e:
             logger.error(f"Error registering Static routes: {str(e)}")
-
+            
         # Add a simple root healthcheck
         @app.route('/ping', methods=['GET'])
         def ping():
@@ -1019,20 +1004,20 @@ def create_app():
                 'status': 'ok',
                 'timestamp': datetime.utcnow().isoformat()
             }), 200
-
+            
         # Add an error timeout handler
         @app.errorhandler(504)
         def gateway_timeout(error):
             """Handler for gateway timeout errors"""
             logger.error(f"Gateway timeout error: {str(error)}")
             return render_template('errors/504.html'), 504
-
+            
         # Add direct dashboard access route  
         @app.route('/dashboard')
         def dashboard_redirect():
             """Direct dashboard access"""
             return redirect(url_for('web.main.dashboard'))
-
+        
         # Add NVCT blockchain report route
         @app.route('/nvct-blockchain-report')
         def nvct_blockchain_report():
@@ -1042,25 +1027,24 @@ def create_app():
                     return f.read()
             except FileNotFoundError:
                 return "Report not found. Please generate the report first.", 404
-
+        
         # Add blockchain status route (alternative access)
         @app.route('/blockchain-status')
         def blockchain_status():
             """Alternative route for blockchain status"""
             return nvct_blockchain_report()
-
+        
         # Add performance monitoring
+        from flask import g, request
         @app.before_request
         def start_timer():
             """Record request start time for performance monitoring"""
-            from flask import g, request
             g.start_time = time.time()
             logger.debug(f"Request started: {request.method} {request.path}")
-
+            
         @app.after_request
         def log_request_time(response):
             """Log request processing time for performance monitoring"""
-            from flask import g, request
             if hasattr(g, 'start_time'):
                 elapsed = time.time() - g.start_time
                 logger.debug(f"Request completed: {request.method} {request.path} ({elapsed:.4f}s)")
@@ -1070,21 +1054,21 @@ def create_app():
                 if elapsed > 5.0:
                     logger.warning(f"Slow request detected: {request.method} {request.path} ({elapsed:.4f}s)")
             return response
-
+            
         # Initialize currency exchange rates including AFD1 and SFN (disabled for fast startup)
         # Currency rates will be loaded on-demand to prevent startup delays
         logger.info("Currency exchange initialization disabled for fast startup")
-
+        
         # Currency exchange initialization temporarily disabled for fast startup
         if False:  # Disable this entire block
             try:
                 from saint_crown_integration import SaintCrownIntegration
-
+                
                 # Get gold price and calculate AFD1 value
                 sc_integration = SaintCrownIntegration()
                 gold_price, _ = sc_integration.get_gold_price()
                 afd1_unit_value = gold_price * 0.1  # AFD1 = 10% of gold price
-
+                
                 # Update AFD1/USD rate
                 from account_holder_models import CurrencyType
                 CurrencyExchangeService.update_exchange_rate(
@@ -1093,7 +1077,7 @@ def create_app():
                     afd1_unit_value, 
                     "system_gold_price"
                 )
-
+                
                 # Update NVCT/AFD1 rate
                 nvct_to_afd1_rate = 1.0 / afd1_unit_value
                 CurrencyExchangeService.update_exchange_rate(
@@ -1105,7 +1089,7 @@ def create_app():
                 logger.info(f"AFD1 exchange rates updated (1 AFD1 = ${afd1_unit_value:.2f} USD)")
             except Exception as e:
                 logger.error(f"Error updating AFD1 exchange rates: {str(e)}")
-
+                
             # Update SFN rates (1:1 with NVCT)
             try:
                 # Set SFN/NVCT rate to 1:1 as requested
@@ -1115,7 +1099,7 @@ def create_app():
                     1.0,  # 1 SFN = 1 NVCT (as requested)
                     "system_fixed_rate"
                 )
-
+                
                 # Set NVCT/SFN rate to 1:1 for consistency
                 CurrencyExchangeService.update_exchange_rate(
                     CurrencyType.NVCT, 
@@ -1123,7 +1107,7 @@ def create_app():
                     1.0,  # 1 NVCT = 1 SFN
                     "system_fixed_rate"
                 )
-
+                
                 # Set SFN/USD rate to 1:1 (derived from SFN = NVCT = USD)
                 CurrencyExchangeService.update_exchange_rate(
                     CurrencyType.SFN, 
@@ -1134,16 +1118,16 @@ def create_app():
                 logger.info("SFN exchange rates updated (1:1 with NVCT)")
             except Exception as e:
                 logger.error(f"Error updating SFN exchange rates: {str(e)}")
-
+                
             # Use reduced system load approach for currency exchange rates
             try:
                 # Apply optimizations to reduce system load
                 from reduce_system_load import reduce_system_load
                 reduce_system_load()
-
+                
                 # Use the fast memory cache instead of the regular one
                 from fast_memory_cache import cache_exchange_rate
-
+                
                 # Set up essential rates in memory without frequent updates
                 essential_rates = {
                     # Core rates only
@@ -1154,33 +1138,33 @@ def create_app():
                     ('NVCT', 'SFN'): 1.0,
                     ('SFN', 'NVCT'): 1.0,
                 }
-
+                
                 # Cache these rates in memory
                 for (from_curr, to_curr), rate in essential_rates.items():
                     cache_exchange_rate(from_curr, to_curr, rate)
-
+                    
                 # Add currency service module patching
                 try:
                     # This approach is safer - use sys.modules to redirect imports
                     import sys
                     import fast_memory_cache
-
+                    
                     # Replace any future imports of memory_cache
                     sys.modules['memory_cache'] = fast_memory_cache
-
+                    
                     # Disable automatic updates in currency_exchange_service
                     if 'currency_exchange_service' in sys.modules:
                         # Get the module reference
                         currency_module = sys.modules['currency_exchange_service']
-
+                        
                         # If the module has a CurrencyExchangeService class or object
                         if hasattr(currency_module, 'CurrencyExchangeService'):
                             service = currency_module.CurrencyExchangeService
-
+                            
                             # Replace the update method with a no-op function if it exists
                             if hasattr(service, 'update_exchange_rate'):
                                 original_update = service.update_exchange_rate
-
+                                
                                 # Create a lightweight version that does minimal work
                                 def lightweight_update(*args, **kwargs):
                                     # Just cache the rate in memory without database operations
@@ -1190,19 +1174,19 @@ def create_app():
                                         rate = float(args[2])
                                         fast_memory_cache.cache_exchange_rate(from_curr, to_curr, rate)
                                     return None
-
+                                
                                 # Apply the patch
                                 service.update_exchange_rate = lightweight_update
                                 logger.info("Currency exchange rate updates optimized")
                 except Exception as e:
                     logger.warning(f"Could not optimize currency service: {str(e)}")
-
+                
                 logger.info("Applied high-performance currency exchange configuration")
-
+                
             except Exception as e:
                 logger.error(f"Error applying system load optimizations: {str(e)}")
                 logger.warning("Continuing with standard initialization")
-
+                
                 try:
                     # Process only key African currencies as fallback
                     african_currency_rates = {
@@ -1212,15 +1196,15 @@ def create_app():
                         "ZAR": 18.50,       # South African Rand
                         "EGP": 47.25,       # Egyptian Pound
                     }
-
+                    
                     african_currencies_updated = 0
-
+                    
                     # Process key African currencies
                     for currency_code, usd_rate in african_currency_rates.items():
                         try:
                             # Get the enum value for this currency
                             currency_enum = getattr(CurrencyType, currency_code)
-
+                            
                             # Update USD to African currency rate
                             CurrencyExchangeService.update_exchange_rate(
                                 CurrencyType.USD,
@@ -1228,7 +1212,7 @@ def create_app():
                                 usd_rate,
                                 "system_african_rates"
                             )
-
+                            
                             # Update NVCT to African currency rate (1:1 with USD)
                             CurrencyExchangeService.update_exchange_rate(
                                 CurrencyType.NVCT,
@@ -1236,16 +1220,16 @@ def create_app():
                                 usd_rate,
                                 "system_african_rates"
                             )
-
+                            
                             african_currencies_updated += 1
                         except Exception as e:
                             logger.debug(f"Error updating rates for {currency_code}: {str(e)}")
-
+                    
                     logger.info(f"African currency exchange rates initialized with {african_currencies_updated} currencies")
-
+                    
                 except Exception as e:
                     logger.error(f"Error initializing African currency exchange rates: {str(e)}")
-
+                
             except Exception as e:
                 logger.error(f"Error initializing currency exchange rates: {str(e)}")
                 logger.warning("Application will run with default currency exchange rates")
@@ -1258,7 +1242,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering Treasury Operations routes: {str(e)}")
             logger.warning("Application will run without Treasury Operations functionality")
-
+            
         # Register PayPal Configuration routes
         try:
             from paypal_config import paypal_config_bp
@@ -1267,7 +1251,7 @@ def create_app():
         except Exception as e:
             logger.error(f"Error registering PayPal Configuration routes: {str(e)}")
             logger.warning("Application will run without PayPal Configuration functionality")
-
+            
         # Register PayPal Setup routes (no authentication required)
         try:
             from paypal_setup import paypal_setup_bp
@@ -1286,7 +1270,7 @@ def create_app():
             logger.warning("Institutional routes module not found")
         except Exception as e:
             logger.error(f"Error registering institutional routes: {str(e)}")
-
+            
         # Register Treasury to Stablecoin Transfer routes
         try:
             from routes.treasury_stablecoin import treasury_bp
@@ -1296,19 +1280,7 @@ def create_app():
             logger.warning("Treasury to Stablecoin transfer routes module not found")
         except Exception as e:
             logger.error(f"Error registering Treasury to Stablecoin transfer routes: {str(e)}")
-
-        # Register Payment Options routes
-        try:
-            from routes.payment_routes import payment_bp
-            app.register_blueprint(payment_bp, name='payment_options_bp')
-            logger.info("Payment options routes registered successfully")
-        except ImportError:
-            logger.warning("Payment options routes module not found")
-        except Exception as e:
-            logger.error(f"Error registering Payment options routes: {str(e)}")
-
-        logger.info("Application initialized successfully")
-
+            
     return app
 
 # Initialize the app instance

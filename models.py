@@ -23,6 +23,62 @@ class UserRole(enum.Enum):
     API = "api"
     DEVELOPER = "developer"
 
+class AccountHolderType(enum.Enum):
+    INDIVIDUAL = "INDIVIDUAL"
+    BUSINESS = "BUSINESS"
+    INSTITUTION = "INSTITUTION"
+    PARTNER = "PARTNER"
+
+class BusinessType(enum.Enum):
+    CORPORATION = "CORPORATION"
+    LLC = "LLC"
+    PARTNERSHIP = "PARTNERSHIP"
+    SOLE_PROPRIETORSHIP = "SOLE_PROPRIETORSHIP"
+    TRUST = "TRUST"
+    FOUNDATION = "FOUNDATION"
+
+class IDType(enum.Enum):
+    PASSPORT = "PASSPORT"
+    NATIONAL_ID = "NATIONAL_ID"
+    DRIVERS_LICENSE = "DRIVERS_LICENSE"
+    SSN = "SSN"
+    TAX_ID = "TAX_ID"
+
+class RelationshipType(enum.Enum):
+    SPOUSE = "SPOUSE"
+    CHILD = "CHILD"
+    PARENT = "PARENT"
+    SIBLING = "SIBLING"
+    BUSINESS_PARTNER = "BUSINESS_PARTNER"
+    TRUST = "TRUST"
+    FOUNDATION = "FOUNDATION"
+    OTHER = "OTHER"
+
+class AccountPurpose(enum.Enum):
+    PERSONAL_SAVINGS = "PERSONAL_SAVINGS"
+    BUSINESS_OPERATIONS = "BUSINESS_OPERATIONS"
+    INVESTMENT = "INVESTMENT"
+    TREASURY_MANAGEMENT = "TREASURY_MANAGEMENT"
+    INTERNATIONAL_TRADE = "INTERNATIONAL_TRADE"
+    CUSTODY_SERVICES = "CUSTODY_SERVICES"
+    CORRESPONDENT_BANKING = "CORRESPONDENT_BANKING"
+
+class MonthlyVolume(enum.Enum):
+    UNDER_10K = "UNDER_10K"
+    TEN_K_100K = "10K_100K"
+    HUNDRED_K_1M = "100K_1M"
+    ONE_M_10M = "1M_10M"
+    TEN_M_100M = "10M_100M"
+    OVER_100M = "OVER_100M"
+
+class FundingSource(enum.Enum):
+    SALARY_INCOME = "SALARY_INCOME"
+    BUSINESS_REVENUE = "BUSINESS_REVENUE"
+    INVESTMENT_RETURNS = "INVESTMENT_RETURNS"
+    TREASURY_OPERATIONS = "TREASURY_OPERATIONS"
+    CORRESPONDENT_TRANSFERS = "CORRESPONDENT_TRANSFERS"
+    INSTITUTIONAL_DEPOSITS = "INSTITUTIONAL_DEPOSITS"
+
 class PartnerType(enum.Enum):
     FINANCIAL_INSTITUTION = "Financial Institution"
     ASSET_MANAGER = "Asset Manager"
@@ -628,7 +684,7 @@ class StablecoinAccount(db.Model):
         return transaction
     
 class CorrespondentBank(db.Model):
-    """Model for correspondent banks in the closed-loop system"""
+    """Model for correspondent banks providing global banking integration"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     bank_code = db.Column(db.String(20), unique=True, nullable=False)
@@ -1782,3 +1838,209 @@ class WireTransfer(db.Model):
         
     def __repr__(self):
         return f"<WireTransfer {self.reference_number}: {self.currency} {self.amount:.2f} to {self.beneficiary_name}>"
+
+class AccountHolderProfile(db.Model):
+    """Enhanced account holder profile with comprehensive KYC information"""
+    __tablename__ = 'account_holder_profiles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('stablecoin_account.id'), nullable=False)
+    
+    # Account type and basic info
+    account_type = db.Column(db.Enum(AccountHolderType), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    status = db.Column(db.String(20), default='PENDING_VERIFICATION', nullable=False)
+    
+    # Individual Information
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    date_of_birth = db.Column(db.Date)
+    nationality = db.Column(db.String(100))
+    
+    # Business Information
+    business_name = db.Column(db.String(200))
+    business_registration = db.Column(db.String(100))
+    incorporation_date = db.Column(db.Date)
+    business_type = db.Column(db.Enum(BusinessType))
+    
+    # Contact Information
+    email = db.Column(db.String(150), nullable=False)
+    phone = db.Column(db.String(50), nullable=False)
+    
+    # Address Information
+    address_line1 = db.Column(db.String(200), nullable=False)
+    address_line2 = db.Column(db.String(200))
+    city = db.Column(db.String(100), nullable=False)
+    state_province = db.Column(db.String(100), nullable=False)
+    postal_code = db.Column(db.String(20), nullable=False)
+    country = db.Column(db.String(100), nullable=False)
+    
+    # Identification Information
+    id_type = db.Column(db.Enum(IDType), nullable=False)
+    id_number = db.Column(db.String(100), nullable=False)
+    id_issuing_country = db.Column(db.String(100), nullable=False)
+    id_expiry_date = db.Column(db.Date)
+    
+    # Account Purpose and Compliance
+    account_purpose = db.Column(db.Enum(AccountPurpose), nullable=False)
+    expected_monthly_volume = db.Column(db.Enum(MonthlyVolume), nullable=False)
+    funding_source = db.Column(db.Enum(FundingSource), nullable=False)
+    
+    # Consent and Compliance
+    terms_conditions_accepted = db.Column(db.Boolean, default=False, nullable=False)
+    privacy_policy_accepted = db.Column(db.Boolean, default=False, nullable=False)
+    kyc_aml_consent = db.Column(db.Boolean, default=False, nullable=False)
+    data_processing_consent = db.Column(db.Boolean, default=False, nullable=False)
+    
+    # Verification Status
+    identity_verified = db.Column(db.Boolean, default=False)
+    address_verified = db.Column(db.Boolean, default=False)
+    verification_date = db.Column(db.DateTime)
+    verification_notes = db.Column(db.Text)
+    
+    # Relationships
+    user = db.relationship('User', backref='account_holder_profiles')
+    account = db.relationship('StablecoinAccount', backref='holder_profile', uselist=False)
+    beneficiaries = db.relationship('AccountBeneficiary', backref='account_profile', cascade='all, delete-orphan')
+    
+    @hybrid_property
+    def full_name(self):
+        """Return the full name based on account type"""
+        if self.account_type == AccountHolderType.INDIVIDUAL:
+            return f"{self.first_name or ''} {self.last_name or ''}".strip()
+        else:
+            return self.business_name or ''
+    
+    @hybrid_property
+    def display_name(self):
+        """Return display name for UI"""
+        name = self.full_name
+        if name:
+            return f"{name} ({self.account_type.value})"
+        return f"Account Holder ({self.account_type.value})"
+    
+    @hybrid_property
+    def is_verified(self):
+        """Check if account holder is fully verified"""
+        return (self.identity_verified and 
+                self.address_verified and 
+                self.status == 'VERIFIED')
+    
+    def to_dict(self):
+        """Convert profile to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'account_type': self.account_type.value,
+            'full_name': self.full_name,
+            'display_name': self.display_name,
+            'email': self.email,
+            'phone': self.phone,
+            'country': self.country,
+            'is_verified': self.is_verified,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class AccountBeneficiary(db.Model):
+    """Account beneficiary information for inheritance and succession planning"""
+    __tablename__ = 'account_beneficiaries'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('account_holder_profiles.id'), nullable=False)
+    
+    # Beneficiary Information
+    beneficiary_name = db.Column(db.String(200), nullable=False)
+    relationship = db.Column(db.Enum(RelationshipType), nullable=False)
+    percentage = db.Column(db.Integer, nullable=False, default=100)  # Percentage of inheritance
+    contact_info = db.Column(db.String(200))  # Email or phone
+    
+    # Additional beneficiary details
+    address = db.Column(db.Text)
+    identification_info = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    
+    # Status and verification
+    is_active = db.Column(db.Boolean, default=True)
+    verified = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        """Convert beneficiary to dictionary"""
+        return {
+            'id': self.id,
+            'beneficiary_name': self.beneficiary_name,
+            'relationship': self.relationship.value,
+            'percentage': self.percentage,
+            'contact_info': self.contact_info,
+            'is_active': self.is_active,
+            'verified': self.verified
+        }
+
+class BlockchainTransaction(db.Model):
+    """Model for tracking blockchain transactions linked to stablecoin operations"""
+    __tablename__ = 'blockchain_transactions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    transaction_id = db.Column(db.String(64), db.ForeignKey('transaction.transaction_id'), nullable=False)
+    
+    # Blockchain details
+    contract_address = db.Column(db.String(42), nullable=False)  # Ethereum contract address
+    from_address = db.Column(db.String(100), nullable=False)     # Source identifier
+    to_address = db.Column(db.String(100), nullable=False)       # Destination identifier
+    amount = db.Column(db.Float, nullable=False)
+    
+    # Transaction execution details
+    tx_hash = db.Column(db.String(66))                          # Blockchain transaction hash
+    block_number = db.Column(db.Integer)                        # Block number when confirmed
+    gas_price = db.Column(db.BigInteger)                        # Gas price used
+    gas_limit = db.Column(db.Integer)                           # Gas limit set
+    gas_used = db.Column(db.Integer)                            # Actual gas used
+    
+    # Status tracking
+    status = db.Column(db.String(20), default='PENDING')        # PENDING, CONFIRMED, FAILED
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    confirmed_at = db.Column(db.DateTime)
+    
+    # Error handling
+    error_message = db.Column(db.Text)
+    retry_count = db.Column(db.Integer, default=0)
+    
+    # Relationships
+    transaction = db.relationship('Transaction', backref='blockchain_transaction', uselist=False)
+    
+    @property
+    def confirmation_count(self):
+        """Get number of confirmations (requires blockchain connection)"""
+        if not self.block_number:
+            return 0
+        try:
+            from blockchain import get_web3_instance
+            web3 = get_web3_instance()
+            current_block = web3.eth.block_number
+            return max(0, current_block - self.block_number)
+        except:
+            return 0
+    
+    @property
+    def is_confirmed(self):
+        """Check if transaction has sufficient confirmations"""
+        return self.confirmation_count >= 12  # 12 confirmations for finality
+    
+    def to_dict(self):
+        """Convert to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'transaction_id': self.transaction_id,
+            'tx_hash': self.tx_hash,
+            'block_number': self.block_number,
+            'confirmations': self.confirmation_count,
+            'status': self.status,
+            'amount': self.amount,
+            'gas_used': self.gas_used,
+            'submitted_at': self.submitted_at.isoformat() if self.submitted_at else None,
+            'confirmed_at': self.confirmed_at.isoformat() if self.confirmed_at else None,
+            'is_final': self.is_confirmed
+        }

@@ -60,59 +60,60 @@ def create_app():
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
 
     # Configure the database with optimized settings
-    # Function to retrieve RDS credentials from Secrets Manager
-def get_db_credentials(secret_name='nvcfund/db-credentials', region_name='us-east-1'):
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(service_name='secretsmanager', region_name=region_name)
+    """Function to retrieve RDS credentials from Secrets Manager"""
+    def get_db_credentials(secret_name='nvcfund/db-credentials', region_name='us-east-2'):
+        import json
+        # Create a Secrets Manager client
+        session = boto3.session.Session()
+        client = session.client(service_name='secretsmanager', region_name=region_name)
 
+        try:
+            # Retrieve the secret value
+            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+        except ClientError as e:
+            logger.error(f"Failed to retrieve database credentials: {str(e)}")
+            raise e
+
+        # Parse the secret string (JSON format)
+        secret = get_secret_value_response['SecretString']
+        secret_dict = json.loads(secret)
+
+        return secret_dict
+
+    # Fetch database credentials from Secrets Manager
     try:
-        # Retrieve the secret value
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    except ClientError as e:
-        logger.error(f"Failed to retrieve database credentials: {str(e)}")
+        db_credentials = get_db_credentials()
+        db_user = db_credentials['username']
+        db_pass = db_credentials['password']
+        db_host = db_credentials['host']
+        db_port = db_credentials['port']
+        db_name = db_credentials['dbname']
+
+        # Construct the database URI
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+        logger.info(f"Successfully set database URI using Secrets Manager: postgresql://{db_user}:[REDACTED]@{db_host}:{db_port}/{db_name}")
+    except Exception as e:
+        logger.error(f"Failed to configure database URI: {str(e)}")
         raise e
 
-    # Parse the secret string (JSON format)
-    secret = get_secret_value_response['SecretString']
-    secret_dict = json.loads(secret)
-
-    return secret_dict
-
-# Fetch database credentials from Secrets Manager
-try:
-    db_credentials = get_db_credentials()
-    db_user = db_credentials['username']
-    db_pass = db_credentials['password']
-    db_host = db_credentials['host']
-    db_port = db_credentials['port']
-    db_name = db_credentials['dbname']
-
-    # Construct the database URI
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
-    logger.info(f"Successfully set database URI using Secrets Manager: postgresql://{db_user}:[REDACTED]@{db_host}:{db_port}/{db_name}")
-except Exception as e:
-    logger.error(f"Failed to configure database URI: {str(e)}")
-    raise e
-
-# Configure SQLAlchemy with optimized settings for t2.micro
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-    "pool_size": 5,         # Reduced for t2.micro
-    "max_overflow": 5,      # Reduced for t2.micro
-    "pool_timeout": 30,     # Reduced timeout
-    "connect_args": {
-        "connect_timeout": 10,
-        "keepalives": 1,
-        "keepalives_idle": 30,
-        "keepalives_interval": 10,
-        "keepalives_count": 5
-    },
-    "execution_options": {
-        "isolation_level": "READ COMMITTED"
+    # Configure SQLAlchemy with optimized settings for t2.micro
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+        "pool_size": 5,         # Reduced for t2.micro
+        "max_overflow": 5,      # Reduced for t2.micro
+        "pool_timeout": 30,     # Reduced timeout
+        "connect_args": {
+            "connect_timeout": 10,
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5
+        },
+        "execution_options": {
+            "isolation_level": "READ COMMITTED"
+        }
     }
-}
 
     
     # Disable SQLAlchemy modification tracking for better performance
@@ -219,7 +220,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     
     # Add custom filters
     import json
-    from utils import format_currency, format_transaction_type
+    from filters import format_currency, format_transaction_type
     from markupsafe import Markup
     app.jinja_env.filters['format_currency'] = lambda amount, currency='USD': format_currency(amount, currency)
     
@@ -479,15 +480,6 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         except Exception as e:
             logger.error(f"Error registering admin routes: {str(e)}")
             
-        # Register SBLC routes
-        try:
-            from routes.sblc_routes import sblc_bp
-            app.register_blueprint(sblc_bp)
-            logger.info("SBLC routes registered successfully")
-        except Exception as e:
-            logger.error(f"Error registering SBLC routes: {str(e)}")
-            logger.warning("Application will run without SBLC functionality")
-            
         # Import SBLC models
         try:
             import sblc_models  # noqa: F401
@@ -581,10 +573,11 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
             from routes.swift_gpi_routes import swift_gpi_routes
             app.register_blueprint(swift_gpi_routes)
             logger.info("SWIFT GPI routes registered successfully")
+        except ImportError:
+            logger.warning("SWIFT GPI routes module not found")
         except Exception as e:
             logger.error(f"Error registering SWIFT GPI routes: {str(e)}")
-            logger.warning("Application will run without SWIFT GPI functionality")
-            
+
         # Register Simplified Exchange routes
         try:
             from routes.simplified_exchange_routes import register_routes as register_exchange_routes
@@ -728,13 +721,8 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
             logger.error(f"Error registering Payment Processor routes: {str(e)}")
             logger.warning("Application will run without Payment Processor functionality")
             
-        # Register PayPal routes
-        try:
-            from routes.paypal_routes import register_paypal_blueprint
-            register_paypal_blueprint(app)
-            logger.info("PayPal routes registered successfully")
-            
-            # Ensure PayPal gateway exists
+        # Ensure PayPal gateway exists
+        def setup_paypal_gateway():
             try:
                 from models import PaymentGateway, PaymentGatewayType
                 paypal_gateway = PaymentGateway.query.filter_by(
@@ -743,30 +731,29 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
                 ).first()
                 
                 if not paypal_gateway:
-                    # Create a new PayPal gateway if it doesn't exist
                     paypal_gateway = PaymentGateway(
                         name="PayPal",
                         gateway_type=PaymentGatewayType.PAYPAL,
                         api_endpoint="https://api.paypal.com",
                         is_active=True,
-                        is_test_mode=False,  # Production mode
+                        is_test_mode=False,
                         description="PayPal payment gateway (Live mode)"
                     )
-                else:
-                    # Update existing gateway to live mode
-                    paypal_gateway.is_test_mode = False
-                    paypal_gateway.description = "PayPal payment gateway (Live mode)"
-                    logger.info("Updated PayPal gateway to live mode")
                     db.session.add(paypal_gateway)
                     db.session.commit()
-                    logger.info("Created new PayPal payment gateway")
+                return True
             except Exception as e:
-                logger.warning(f"Error setting up PayPal gateway: {str(e)}")
-                
+                logger.error(f"PayPal gateway setup failed: {str(e)}")
+                return False
+        # Register PayPal routes
+        try:
+            from routes.paypal_routes import register_paypal_blueprint
+            register_paypal_blueprint(app)
+            if not setup_paypal_gateway():
+                logger.warning("PayPal gateway setup failed")
         except Exception as e:
-            logger.error(f"Error registering PayPal routes: {str(e)}")
-            logger.warning("Application will run without PayPal functionality")
-            
+            logger.error(f"Error registering PayPal routes: {str(e)}")            
+
         # Register KTT Telex routes
         try:
             from routes.telex_routes import register_telex_routes
@@ -1034,17 +1021,16 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
             return nvct_blockchain_report()
         
         # Add performance monitoring
+        from flask import g, request
         @app.before_request
         def start_timer():
             """Record request start time for performance monitoring"""
-            from flask import g, request
             g.start_time = time.time()
             logger.debug(f"Request started: {request.method} {request.path}")
             
         @app.after_request
         def log_request_time(response):
             """Log request processing time for performance monitoring"""
-            from flask import g, request
             if hasattr(g, 'start_time'):
                 elapsed = time.time() - g.start_time
                 logger.debug(f"Request completed: {request.method} {request.path} ({elapsed:.4f}s)")

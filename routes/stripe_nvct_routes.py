@@ -33,6 +33,7 @@ def checkout_for_nvct():
     try:
         # Check if user has an NVCT account
         if not hasattr(current_user, 'account_holder') or not current_user.account_holder:
+            session['payment_redirect'] = url_for('stripe_nvct.checkout_for_nvct')
             flash("You need to create an account before making a payment", "warning")
             return redirect(url_for('stablecoin.create_account'))
             

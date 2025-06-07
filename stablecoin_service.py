@@ -37,14 +37,25 @@ logger = logging.getLogger(__name__)
 def create_stablecoin_account(user_id, account_type="INDIVIDUAL", initial_balance=0.0):
     """Create a new stablecoin account for a user"""
     try:
-        # Generate unique account number
-        account_number = f"NVCT-{secrets.token_hex(6).upper()}"
-        
         # Check if user exists
         user = User.query.get(user_id)
         if not user:
             logger.error(f"User with ID {user_id} not found")
             return None, "User not found"
+        
+        # Check if user already has a stablecoin account of this type
+        existing_account = StablecoinAccount.query.filter_by(
+            user_id=user_id,
+            account_type=account_type,
+            is_active=True
+        ).first()
+        
+        if existing_account:
+            logger.info(f"User {user_id} already has an active {account_type} stablecoin account: {existing_account.account_number}")
+            return existing_account, None
+        
+        # Generate unique account number
+        account_number = f"NVCT-{secrets.token_hex(6).upper()}"
         
         # Create account
         account = StablecoinAccount(
